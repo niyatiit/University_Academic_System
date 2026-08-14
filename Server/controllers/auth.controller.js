@@ -48,33 +48,36 @@ const register = async (req, res) => {
   }
 };
 
-const login = async (req,res) =>{
-    try{
-        const {email , password} = req.body;
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-        if(!email || !password){
-            return res.status(400).json({message : "Email and Password are required"})
-        }
-
-        const user = await User.findOne({ email });
-
-        if(!user){
-            return res.status(400).json({message : "Invalid Email or Password"});
-        }
-
-        const isMatch = await bcrypt.compare(password , user.password);
-
-        if(!isMatch){
-            return res.status(400).json({ message : "Invalid Email or password "})
-        }
-
-        const token = generateToken(user._id);
-
-        return res.status(200).json({ message : "Login Successfully" , token , user})
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and Password are required" });
     }
-    catch(error){
-        return res.status(500).json({message : "Server Error" , error : message.error})
+
+    console.log("Login attempt with email:", email);  // 👈 add this
+
+    const user = await User.findOne({ email });
+    console.log("Found user:", user);  // 👈 add this
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid Email or Password" });
     }
-}
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    console.log("Password match:", isMatch);  // 👈 add this
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid Email or password" });
+    }
+
+    const token = generateToken(user._id);
+
+    return res.status(200).json({ message: "Login Successfully", token, user });
+  } catch (error) {
+    return res.status(500).json({ message: "Server Error", error: error.message }); // 👈 also fix this bug
+  }
+};
 
 export {register , login}

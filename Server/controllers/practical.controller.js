@@ -14,16 +14,7 @@ const addPractical = async (req, res) => {
       honorarium,
     } = req.body;
 
-    if (
-      !examiner ||
-      !totalDays ||
-      !date ||
-      !subjectCode ||
-      !personName ||
-      !ta ||
-      !da ||
-      !honorarium
-    ) {
+    if (!examiner || !totalDays || !date || !subjectCode) {
       return res.status(400).json({
         message: "Examiner, total days, date, and subject code are required",
       });
@@ -38,17 +29,19 @@ const addPractical = async (req, res) => {
 
     const rate = examinerData.designation.rate;
 
-    const taAmount = ta || 0;
-    const daAmount = da || 0;
-    const honorariumAmount = honorarium || 0;
+    // Convert everything to actual numbers first
+    const daysNum = Number(totalDays);
+    const taAmount = Number(ta) || 0;
+    const daAmount = Number(da) || 0;
+    const honorariumAmount = Number(honorarium) || 0;
 
-    const total = rate * totalDays + taAmount + daAmount + honorariumAmount;
+    const total = rate * daysNum + taAmount + daAmount + honorariumAmount;
 
     const practical = await Practical.create({
       examiner,
       designation: examinerData.designation._id,
       rate,
-      totalDays,
+      totalDays: daysNum,
       date,
       subjectCode,
       personName: personName || "",
@@ -57,7 +50,6 @@ const addPractical = async (req, res) => {
       honorarium: honorariumAmount,
       total,
     });
-
     return res.status(201).json({ message: "Data enterd successfully" });
   } catch (error) {
     return res

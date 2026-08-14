@@ -19,16 +19,16 @@ const addTheoryExam = async (req, res) => {
     }
 
     const rate = examinerData.designation.rate;
-    const totalRemuneration = rate * totalDays;
+    const daysNum = Number(totalDays);
+    const totalRemuneration = rate * daysNum;
 
     const theoryExam = await Theory.create({
       examiner,
       designation: examinerData.designation._id,
       rate,
-      totalDays,
+      totalDays: daysNum,
       totalRemuneration,
     });
-
     return res
       .status(201)
       .json({ message: "Data entered successfully", theoryExam });

@@ -3,12 +3,11 @@ import express from "express"
 import dotenv from "dotenv"
 import cors from "cors"
 import connectDB from "./config/db.js"
-import userRouter from "./routes/user.routes.js"
-import examierRoute from "./routes/examiner.route.js"
+import userRouter from "./routes/user.route.js"
+import examinerRouter from './routes/examiner.route.js'
 import theoryRouter from "./routes/theory.route.js"
-import examierRouter from "./routes/examiner.route.js"
 import practicalRouter from "./routes/practical.route.js"
-import bankRouter from "./routes/bank.routes.js"
+import bankRouter from "./routes/bank.route.js"
 
 
 //load env variable
@@ -38,7 +37,7 @@ app.get("/",(req,res)=>{
 // });
 // Routes (we'll add these one by one)
 app.use("/api/user", userRouter)
-app.use("/api/examiner", examierRouter);
+app.use("/api/examiner",examinerRouter );
 app.use("/api/theory", theoryRouter);
 app.use("/api/practical", practicalRouter);
 app.use("/api/bank", bankRouter);

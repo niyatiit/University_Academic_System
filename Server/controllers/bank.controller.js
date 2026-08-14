@@ -1,8 +1,7 @@
-import Bank from "../models/bankdetails.model.js";
+import Bank from "../models/bank.model.js";
 import Theory from "../models/theory.model.js";
 import Practical from "../models/practical.model.js";
 import Examiner from "../models/examiner.model.js";
-import { generatePDF } from "../utils/export.util.js";
 
 // @desc   Get examiners who have Theory or Practical entries (for dropdown)
 // @route  GET /api/bank/examiners
@@ -70,7 +69,6 @@ const addBankDetails = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // duplicate check
     const existingAccount = await Bank.findOne({ accountNumber });
 
     if (existingAccount) {
@@ -131,42 +129,9 @@ const getAllBankDetails = async (req, res) => {
   }
 };
 
-// @desc   Export Bank Details as PDF
-// @route  GET /api/bank/export/pdf
-const exportBankPDF = async (req, res) => {
-  try {
-    const bankDetails = await Bank.find().populate("examiner", "name");
-
-    const columns = [
-      { header: "Name", key: "name" },
-      { header: "A/C No", key: "accountNumber" },
-      { header: "IFSC Code", key: "ifscCode" },
-      { header: "Bank Name", key: "bankName" },
-      { header: "Amount", key: "amount" },
-    ];
-
-    const rows = bankDetails.map((item) => ({
-      name: item.examiner?.name || "N/A",
-      accountNumber: item.accountNumber,
-      ifscCode: item.ifscCode,
-      bankName: item.bankName,
-      amount: item.amount,
-    }));
-
-    const buffer = await generatePDF("Bank Details Report", columns, rows);
-
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "attachment; filename=BankDetails.pdf");
-    res.send(buffer);
-  } catch (error) {
-    return res.status(400).json({ message: "Server error", error: error.message });
-  }
-};
-
 export {
   getEligibleExaminers,
   getExaminerTotalAmount,
   addBankDetails,
   getAllBankDetails,
-  exportBankPDF,
 };

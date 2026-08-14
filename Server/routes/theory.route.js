@@ -1,5 +1,5 @@
 import express from "express"
-import protect from "../middlwares/auth.middlware.js"
+import {protect} from "../middleware/auth.middleware.js"
 import { addTheoryExam, getTheoryExam } from "../controllers/theory.controller.js"
 
 const theoryRouter = express.Router()
