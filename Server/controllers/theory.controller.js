@@ -1,5 +1,6 @@
 import Examiner from "../models/examiner.model.js";
 import Theory from "../models/theory.model.js";
+import { generateExcel, generatePDF } from "../utils/export.util.js";
 
 const addTheoryExam = async (req, res) => {
   try {
@@ -56,4 +57,72 @@ const getTheoryExam = async (req, res) => {
     });
   }
 };
-export { addTheoryExam, getTheoryExam };
+
+const exportTheoryExcel = async (req, res) => {
+  try {
+    const theoryExams = await Theory.find()
+      .populate("examiner", "name")
+      .populate("designation", "title");
+
+    const columns = [
+      { header: "Examiner Name", key: "examinerName", width: 25 },
+      { header: "Designation", key: "designationTitle", width: 20 },
+      { header: "Rate", key: "rate", width: 12 },
+      { header: "Total Days", key: "totalDays", width: 12 },
+      { header: "Total Remuneration", key: "totalRemuneration", width: 18 },
+    ];
+
+    const rows = theoryExams.map((item) => ({
+      examinerName: item.examiner?.name || "N/A",
+      designationTitle: item.designation?.title || "N/A",
+      rate: item.rate,
+      totalDays: item.totalDays,
+      totalRemuneration: item.totalRemuneration,
+    }));
+
+    const buffer = await generateExcel("Theory Examination", columns, rows);
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", "attachment; filename=TheoryExamination.xlsx");
+    res.send(buffer);
+  } catch (error) {
+    res.status(400).json({ message: "Server error", error: error.message });
+  }
+};
+
+const exportTheoryPDF = async (req, res) => {
+  try {
+    const theoryExams = await Theory.find()
+      .populate("examiner", "name")
+      .populate("designation", "title");
+
+    const columns = [
+      { header: "Examiner Name", key: "examinerName" },
+      { header: "Designation", key: "designationTitle" },
+      { header: "Rate", key: "rate" },
+      { header: "Total Days", key: "totalDays" },
+      { header: "Total Remuneration", key: "totalRemuneration" },
+    ];
+
+    const rows = theoryExams.map((item) => ({
+      examinerName: item.examiner?.name || "N/A",
+      designationTitle: item.designation?.title || "N/A",
+      rate: item.rate,
+      totalDays: item.totalDays,
+      totalRemuneration: item.totalRemuneration,
+    }));
+
+    const buffer = await generatePDF("Theory Examination Report", columns, rows);
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=TheoryExamination.pdf");
+    res.send(buffer);
+  } catch (error) {
+    res.status(400).json({ message: "Server error", error: error.message });
+  }
+};
+
+export { addTheoryExam, getTheoryExam , exportTheoryExcel, exportTheoryPDF };
