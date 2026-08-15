@@ -31,7 +31,7 @@ function Navbar() {
           </>
         ) : (
           <>
-            <Link to="/" className="hover:text-blue-400 transition-colors">
+            <Link to="/login" className="hover:text-blue-400 transition-colors">
               Login
             </Link>
             <Link

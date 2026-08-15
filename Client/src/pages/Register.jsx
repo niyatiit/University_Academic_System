@@ -129,7 +129,7 @@ function Register() {
 
         <p className="text-center text-sm text-slate-600 mt-5">
           Already have an account?{" "}
-          <Link to="/" className="text-blue-500 hover:underline">
+          <Link to="/login" className="text-blue-500 hover:underline">
             Login here
           </Link>
         </p>

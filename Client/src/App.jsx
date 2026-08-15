@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -14,14 +16,58 @@ function App() {
     <BrowserRouter>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Home/>}></Route>
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/add-examiner" element={<AddExaminer />} />
-        <Route path="/theory-examination" element={<TheoryExamination />} />
-        <Route path="/practical-examination" element={<PracticalExamination />} />
-        <Route path="/bank-details" element={<BankDetails />} />
-        <Route path="/summary" element={<Summary />} />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-examiner"
+          element={
+            <ProtectedRoute>
+              <AddExaminer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/theory-examination"
+          element={
+            <ProtectedRoute>
+              <TheoryExamination />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/practical-examination"
+          element={
+            <ProtectedRoute>
+              <PracticalExamination />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/bank-details"
+          element={
+            <ProtectedRoute>
+              <BankDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/summary"
+          element={
+            <ProtectedRoute>
+              <Summary />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../components/DashboardLayout";
 import api from "../api/axios";
+import { downloadFile } from "../utils/downloadFile";
 
 function PracticalExamination() {
   const [examiners, setExaminers] = useState([]);
@@ -86,9 +87,25 @@ function PracticalExamination() {
   return (
     <DashboardLayout>
       <div className="p-8 max-w-5xl">
-        <h1 className="text-2xl font-bold text-slate-800 mb-6">
-          Practical Examination
-        </h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-slate-800">
+            Practical Examination
+          </h1>
+          <div className="flex gap-2">
+            <button
+              onClick={handleExportExcel}
+              className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
+            >
+              Export Excel
+            </button>
+            <button
+              onClick={handleExportPDF}
+              className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
+            >
+              Export PDF
+            </button>
+          </div>
+        </div>
 
         {/* Form */}
         <form
@@ -122,7 +139,9 @@ function PracticalExamination() {
               </label>
               <input
                 type="text"
-                value={selectedExaminer ? selectedExaminer.designation.title : ""}
+                value={
+                  selectedExaminer ? selectedExaminer.designation.title : ""
+                }
                 readOnly
                 placeholder="Auto-filled"
                 className="w-full border border-slate-300 rounded-md px-3 py-2 bg-slate-100 text-slate-600"
@@ -317,7 +336,10 @@ function PracticalExamination() {
               ))}
               {entries.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="px-4 py-6 text-center text-slate-400">
+                  <td
+                    colSpan={11}
+                    className="px-4 py-6 text-center text-slate-400"
+                  >
                     No entries yet
                   </td>
                 </tr>
@@ -329,5 +351,27 @@ function PracticalExamination() {
     </DashboardLayout>
   );
 }
+
+const handleExportExcel = async () => {
+  try {
+    const res = await api.get("/practical/export/excel", {
+      responseType: "blob",
+    });
+    downloadFile(res.data, "PracticalExamination.xlsx");
+  } catch (err) {
+    console.error("Excel export failed:", err);
+  }
+};
+
+const handleExportPDF = async () => {
+  try {
+    const res = await api.get("/practical/export/pdf", {
+      responseType: "blob",
+    });
+    downloadFile(res.data, "PracticalExamination.pdf");
+  } catch (err) {
+    console.error("PDF export failed:", err);
+  }
+};
 
 export default PracticalExamination;

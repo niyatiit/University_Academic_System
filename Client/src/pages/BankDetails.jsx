@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../components/DashboardLayout";
 import api from "../api/axios";
+import { downloadFile } from "../utils/downloadFile";
 
 function BankDetails() {
   const [eligibleExaminers, setEligibleExaminers] = useState([]);
@@ -70,7 +71,12 @@ function BankDetails() {
     try {
       const res = await api.post("/bank/add", formData);
       setMessage({ type: "success", text: res.data.message });
-      setFormData({ examiner: "", accountNumber: "", ifscCode: "", bankName: "" });
+      setFormData({
+        examiner: "",
+        accountNumber: "",
+        ifscCode: "",
+        bankName: "",
+      });
       setAmount(0);
       fetchBankEntries(); // refresh table
     } catch (err) {
@@ -86,7 +92,15 @@ function BankDetails() {
   return (
     <DashboardLayout>
       <div className="p-8 max-w-4xl">
-        <h1 className="text-2xl font-bold text-slate-800 mb-6">Bank Details</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-slate-800">Bank Details</h1>
+          <button
+            onClick={handleExportPDF}
+            className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
+          >
+            Export PDF
+          </button>
+        </div>
 
         {/* Form */}
         <form
@@ -218,7 +232,10 @@ function BankDetails() {
               ))}
               {bankEntries.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
+                  <td
+                    colSpan={5}
+                    className="px-4 py-6 text-center text-slate-400"
+                  >
                     No entries yet
                   </td>
                 </tr>
@@ -231,4 +248,12 @@ function BankDetails() {
   );
 }
 
+const handleExportPDF = async () => {
+  try {
+    const res = await api.get("/bank/export/pdf", { responseType: "blob" });
+    downloadFile(res.data, "BankDetails.pdf");
+  } catch (err) {
+    console.error("PDF export failed:", err);
+  }
+};
 export default BankDetails;
