@@ -4,11 +4,11 @@ import { generateExcel, generatePDF } from "../utils/export.util.js";
 
 const addTheoryExam = async (req, res) => {
   try {
-    const { examiner, totalDays } = req.body;
+    const { examiner, totalDays, department, semester } = req.body;
 
-    if (!examiner || !totalDays) {
-      return res.status.json(400)({
-        message: "Examiner and total days are required",
+    if (!examiner || !totalDays || !department || !semester) {
+      return res.status(400).json({
+        message: "Examiner, total days, department, and semester are required",
       });
     }
 
@@ -28,6 +28,8 @@ const addTheoryExam = async (req, res) => {
       designation: examinerData.designation._id,
       rate,
       totalDays: daysNum,
+      department,
+      semester: Number(semester),
       totalRemuneration,
     });
     return res
@@ -125,5 +127,4 @@ const exportTheoryPDF = async (req, res) => {
   }
 };
 
-
-export { addTheoryExam, getTheoryExam , exportTheoryExcel, exportTheoryPDF };
+export { addTheoryExam, getTheoryExam, exportTheoryExcel, exportTheoryPDF };

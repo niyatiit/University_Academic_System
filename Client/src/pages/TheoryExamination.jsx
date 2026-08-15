@@ -9,10 +9,13 @@ function TheoryExamination() {
   const [formData, setFormData] = useState({
     examiner: "",
     totalDays: "",
+    department: "",
+    semester: "",
   });
   const [message, setMessage] = useState({ type: "", text: "" });
   const [loading, setLoading] = useState(false);
-  
+  const masterDepartments = ["MBA", "MCA"];
+  const allDepartments = ["BBA", "MBA", "BCA", "MCA", "JMC", "B.TECH", "BCOM"];
 
   useEffect(() => {
     fetchExaminers();
@@ -43,7 +46,12 @@ function TheoryExamination() {
   const totalRemuneration = rate * totalDaysNum;
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "department" ? { semester: "" } : {}), // reset semester when department changes
+    }));
     setMessage({ type: "", text: "" });
   };
 
@@ -51,13 +59,20 @@ function TheoryExamination() {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: "", text: "" });
+     console.log("Submitting formData:", formData);
 
     try {
       const res = await api.post("/theory/add", formData);
       setMessage({ type: "success", text: res.data.message });
-      setFormData({ examiner: "", totalDays: "" });
-      fetchEntries(); // refresh table
+      setFormData({
+        examiner: "",
+        totalDays: "",
+        department: "",
+        semester: "",
+      });
+      fetchEntries();
     } catch (err) {
+      alert(JSON.stringify(err.response?.data)); // 👈 TEMPORARY - shows exact error as popup
       setMessage({
         type: "error",
         text: err.response?.data?.message || "Failed to add entry",
@@ -66,6 +81,9 @@ function TheoryExamination() {
       setLoading(false);
     }
   };
+
+  const maxSemester = masterDepartments.includes(formData.department) ? 4 : 8;
+  const semesterOptions = Array.from({ length: maxSemester }, (_, i) => i + 1);
 
   return (
     <DashboardLayout>
@@ -159,6 +177,51 @@ function TheoryExamination() {
                 required
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Department
+              </label>
+              <select
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                required
+              >
+                <option value="">Select Department</option>
+                {allDepartments.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Semester
+              </label>
+              <select
+                name="semester"
+                value={formData.semester}
+                onChange={handleChange}
+                disabled={!formData.department}
+                className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white disabled:bg-slate-100"
+                required
+              >
+                <option value="">
+                  {formData.department
+                    ? "Select Semester"
+                    : "Select department first"}
+                </option>
+                {semesterOptions.map((sem) => (
+                  <option key={sem} value={sem}>
+                    Semester {sem}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Live Total Remuneration */}
@@ -200,6 +263,8 @@ function TheoryExamination() {
                 <th className="px-4 py-3 font-semibold">Rate</th>
                 <th className="px-4 py-3 font-semibold">Days</th>
                 <th className="px-4 py-3 font-semibold">Total Remuneration</th>
+                <th className="px-4 py-3 font-semibold">Department</th>
+                <th className="px-4 py-3 font-semibold">Semester</th>
               </tr>
             </thead>
             <tbody>
@@ -212,6 +277,8 @@ function TheoryExamination() {
                   <td className="px-4 py-3 font-semibold text-blue-600">
                     ₹{entry.totalRemuneration.toLocaleString()}
                   </td>
+                  <td className="px-4 py-3">{entry.department}</td>
+                  <td className="px-4 py-3">{entry.semester}</td>
                 </tr>
               ))}
               {entries.length === 0 && (
