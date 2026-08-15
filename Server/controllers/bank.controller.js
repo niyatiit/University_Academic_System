@@ -4,7 +4,6 @@ import Practical from "../models/practical.model.js";
 import Examiner from "../models/examiner.model.js";
 import { generatePDF } from "../utils/export.util.js";
 
-
 // @desc   Get examiners who have Theory or Practical entries (for dropdown)
 // @route  GET /api/bank/examiners
 const getEligibleExaminers = async (req, res) => {
@@ -40,11 +39,11 @@ const getExaminerTotalAmount = async (req, res) => {
 
     const theoryTotal = theoryEntries.reduce(
       (sum, entry) => sum + entry.totalRemuneration,
-      0
+      0,
     );
     const practicalTotal = practicalEntries.reduce(
       (sum, entry) => sum + entry.total,
-      0
+      0,
     );
 
     const totalAmount = theoryTotal + practicalTotal;
@@ -71,6 +70,22 @@ const addBankDetails = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
+    // Validate account number format
+    const accountPattern = /^\d{9,18}$/;
+    if (!accountPattern.test(accountNumber)) {
+      return res.status(400).json({
+        message: "Account number must be 9-18 digits (numbers only)",
+      });
+    }
+
+    // Validate IFSC code format
+    const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+    if (!ifscPattern.test(ifscCode.toUpperCase())) {
+      return res.status(400).json({
+        message: "Invalid IFSC code format (e.g. SBIN0001234)",
+      });
+    }
+
     const existingAccount = await Bank.findOne({ accountNumber });
 
     if (existingAccount) {
@@ -84,11 +99,11 @@ const addBankDetails = async (req, res) => {
 
     const theoryTotal = theoryEntries.reduce(
       (sum, entry) => sum + entry.totalRemuneration,
-      0
+      0,
     );
     const practicalTotal = practicalEntries.reduce(
       (sum, entry) => sum + entry.total,
-      0
+      0,
     );
 
     const amount = theoryTotal + practicalTotal;
@@ -131,7 +146,6 @@ const getAllBankDetails = async (req, res) => {
   }
 };
 
-
 const exportBankPDF = async (req, res) => {
   try {
     const bankDetails = await Bank.find().populate("examiner", "name");
@@ -155,10 +169,86 @@ const exportBankPDF = async (req, res) => {
     const buffer = await generatePDF("Bank Details Report", columns, rows);
 
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "attachment; filename=BankDetails.pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=BankDetails.pdf",
+    );
     res.send(buffer);
   } catch (error) {
     res.status(400).json({ message: "Server error", error: error.message });
+  }
+};
+
+// @desc   Get filtered summary by department/semester (based on Theory + Practical entries)
+// @route  GET /api/bank/summary?department=X&semester=Y
+const getFilteredSummary = async (req, res) => {
+  try {
+    const { department, semester } = req.query;
+
+    const theoryFilter = {};
+    const practicalFilter = {};
+
+    if (department) {
+      theoryFilter.department = department;
+      practicalFilter.department = department;
+    }
+    if (semester) {
+      theoryFilter.semester = Number(semester);
+      practicalFilter.semester = Number(semester);
+    }
+
+    const theoryEntries = await Theory.find(theoryFilter).populate(
+      "examiner",
+      "name",
+    );
+    const practicalEntries = await Practical.find(practicalFilter).populate(
+      "examiner",
+      "name",
+    );
+
+    // Group totals by examiner
+    const totals = {};
+
+    theoryEntries.forEach((entry) => {
+      if (!entry.examiner) return;
+      const id = entry.examiner._id.toString();
+      if (!totals[id]) totals[id] = { name: entry.examiner.name, total: 0 };
+      totals[id].total += entry.totalRemuneration;
+    });
+
+    practicalEntries.forEach((entry) => {
+      if (!entry.examiner) return;
+      const id = entry.examiner._id.toString();
+      if (!totals[id]) totals[id] = { name: entry.examiner.name, total: 0 };
+      totals[id].total += entry.total;
+    });
+
+    const examinerIds = Object.keys(totals);
+
+    // Fetch bank details for these examiners
+    const bankRecords = await Bank.find({ examiner: { $in: examinerIds } });
+
+    const summary = examinerIds.map((id) => {
+      const bank = bankRecords.find((b) => b.examiner.toString() === id);
+      return {
+        examinerId: id,
+        name: totals[id].name,
+        accountNumber: bank?.accountNumber || "Not added yet",
+        ifscCode: bank?.ifscCode || "-",
+        bankName: bank?.bankName || "-",
+        amount: totals[id].total,
+      };
+    });
+
+    return res.status(200).json({
+      message: "Fetched filtered summary successfully",
+      summary,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
@@ -168,4 +258,5 @@ export {
   addBankDetails,
   getAllBankDetails,
   exportBankPDF,
+  getFilteredSummary,
 };

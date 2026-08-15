@@ -30,7 +30,13 @@ const addPractical = async (req, res) => {
           "Examiner, total days, date, subject code, department, and semester are required",
       });
     }
-
+// Validate subject code format
+const subjectCodePattern = /^[A-Za-z]{2,5}\d{2,4}$/;
+if (!subjectCodePattern.test(subjectCode)) {
+  return res.status(400).json({
+    message: "Subject code must be letters followed by numbers (e.g. CS101)",
+  });
+}
     const examinerData =
       await Examiner.findById(examiner).populate("designation");
 

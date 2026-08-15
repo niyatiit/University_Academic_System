@@ -5,6 +5,7 @@ import {
   addBankDetails,
   getAllBankDetails,
   exportBankPDF,
+  getFilteredSummary,
 } from "../controllers/bank.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 
@@ -15,5 +16,6 @@ bankRouter.get("/amount/:examinerId", protect, getExaminerTotalAmount);
 bankRouter.post("/add", protect, addBankDetails);
 bankRouter.get("/all", protect, getAllBankDetails);
 bankRouter.get("/export/pdf", protect, exportBankPDF);
+bankRouter.get("/summary",protect,getFilteredSummary)
 
 export default bankRouter;

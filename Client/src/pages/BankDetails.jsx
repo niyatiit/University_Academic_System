@@ -150,7 +150,10 @@ function BankDetails() {
                 name="accountNumber"
                 value={formData.accountNumber}
                 onChange={handleChange}
-                placeholder="Enter account number"
+                placeholder="Enter 9-18 digit account number"
+                pattern="[0-9]{9,18}"
+                title="Account number must be 9-18 digits"
+                maxLength={18}
                 className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -165,7 +168,10 @@ function BankDetails() {
                 name="ifscCode"
                 value={formData.ifscCode}
                 onChange={handleChange}
-                placeholder="Enter IFSC code"
+                placeholder="e.g. SBIN0001234"
+                pattern="[A-Za-z]{4}0[A-Za-z0-9]{6}"
+                title="4 letters + 0 + 6 alphanumeric characters (e.g. SBIN0001234)"
+                maxLength={11}
                 className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
                 required
               />
