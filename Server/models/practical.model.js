@@ -53,7 +53,19 @@ const practicalSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    department: {
+      type: String,
+      required: [true, "Department is required"],
+      enum: ["BBA", "MBA", "BCA", "MCA", "JMC", "B.TECH", "BCOM"],
+    },
+    semester: {
+      type: Number,
+      required: [true, "Semester is required"],
+      min: 1,
+      max: 8,
+    },
   },
+
   {
     timestamps: true,
   },

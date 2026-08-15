@@ -13,11 +13,21 @@ const addPractical = async (req, res) => {
       ta,
       da,
       honorarium,
+      department,
+      semester,
     } = req.body;
 
-    if (!examiner || !totalDays || !date || !subjectCode) {
+    if (
+      !examiner ||
+      !totalDays ||
+      !date ||
+      !subjectCode ||
+      !department ||
+      !semester
+    ) {
       return res.status(400).json({
-        message: "Examiner, total days, date, and subject code are required",
+        message:
+          "Examiner, total days, date, subject code, department, and semester are required",
       });
     }
 
@@ -46,12 +56,16 @@ const addPractical = async (req, res) => {
       date,
       subjectCode,
       personName: personName || "",
+      department,
+      semester: Number(semester),
       ta: taAmount,
       da: daAmount,
       honorarium: honorariumAmount,
       total,
     });
-    return res.status(201).json({ message: "Data enterd successfully" });
+    return res
+      .status(201)
+      .json({ message: "Data entered successfully", practical });
   } catch (error) {
     return res
       .status(400)
