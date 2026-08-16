@@ -1,18 +1,24 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Home() {
+  const { user } = useAuth();
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <div className="bg-slate-50">
-      {/* Hero Section */}
+      {/* ...rest of your existing Home JSX stays exactly the same... */}
       <div className="max-w-5xl mx-auto px-6 py-20 text-center">
         <h1 className="text-4xl sm:text-5xl font-bold text-slate-800 mb-4">
           Academic Payment Portal
         </h1>
         <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-8">
           A simple, centralized system to manage examiner remuneration for
-          theory and practical examinations — from tracking exam duty
-          payments to storing bank details for disbursement, all in one
-          place.
+          theory and practical examinations — from tracking exam duty payments
+          to storing bank details for disbursement, all in one place.
         </p>
         <div className="flex items-center justify-center gap-4">
           <Link
@@ -42,8 +48,8 @@ function Home() {
               📋 Theory Examination
             </h3>
             <p className="text-sm text-slate-600">
-              Record examiner duty days and automatically calculate
-              remuneration based on designation rate.
+              Record examiner duty days and automatically calculate remuneration
+              based on designation rate.
             </p>
           </div>
 
@@ -52,8 +58,8 @@ function Home() {
               🧪 Practical Examination
             </h3>
             <p className="text-sm text-slate-600">
-              Track practical exam duties along with TA, DA, and Honorarium
-              — with instant total calculation.
+              Track practical exam duties along with TA, DA, and Honorarium —
+              with instant total calculation.
             </p>
           </div>
 
@@ -62,9 +68,8 @@ function Home() {
               🏦 Bank Details
             </h3>
             <p className="text-sm text-slate-600">
-              Store examiner bank account details with automatically
-              calculated total payable amount, safeguarded against
-              duplicate entries.
+              Store examiner bank account details with automatically calculated
+              total payable amount, safeguarded against duplicate entries.
             </p>
           </div>
 
@@ -73,8 +78,8 @@ function Home() {
               👤 Examiner Management
             </h3>
             <p className="text-sm text-slate-600">
-              Add and manage examiners along with their designation and
-              per-day rate.
+              Add and manage examiners along with their designation and per-day
+              rate.
             </p>
           </div>
 
@@ -83,8 +88,8 @@ function Home() {
               📊 Summary Reports
             </h3>
             <p className="text-sm text-slate-600">
-              View a consolidated summary of all payments with quick search
-              and grand total.
+              View a consolidated summary of all payments with quick search and
+              grand total.
             </p>
           </div>
 
