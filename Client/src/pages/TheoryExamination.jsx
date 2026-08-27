@@ -59,7 +59,7 @@ function TheoryExamination() {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: "", text: "" });
-     console.log("Submitting formData:", formData);
+    console.log("Submitting formData:", formData);
 
     try {
       const res = await api.post("/theory/add", formData);
@@ -254,8 +254,8 @@ function TheoryExamination() {
         </form>
 
         {/* Table */}
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <table className="w-full text-sm text-left">
+        <div className="bg-white shadow-md rounded-lg overflow-x-auto">
+          <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-slate-100 text-slate-700">
               <tr>
                 <th className="px-4 py-3 font-semibold">Examiner</th>

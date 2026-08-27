@@ -86,7 +86,8 @@ function AddExaminer() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this examiner?")) return;
+    if (!window.confirm("Are you sure you want to delete this examiner?"))
+      return;
 
     try {
       await api.delete(`/examiner/${id}`);
@@ -215,7 +216,8 @@ function AddExaminer() {
           </div>
 
           <p className="text-xs text-slate-500">
-            If this designation already exists, its rate will be updated to the new value you enter.
+            If this designation already exists, its rate will be updated to the
+            new value you enter.
           </p>
 
           {message.text && (
@@ -234,7 +236,11 @@ function AddExaminer() {
               disabled={loading}
               className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-medium py-2.5 px-6 rounded-md transition-colors"
             >
-              {loading ? "Saving..." : editingId ? "Update Examiner" : "Add Examiner"}
+              {loading
+                ? "Saving..."
+                : editingId
+                  ? "Update Examiner"
+                  : "Add Examiner"}
             </button>
             {editingId && (
               <button
@@ -291,7 +297,10 @@ function AddExaminer() {
               ))}
               {examiners.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-6 text-center text-slate-400">
+                  <td
+                    colSpan={7}
+                    className="px-4 py-6 text-center text-slate-400"
+                  >
                     No examiners added yet
                   </td>
                 </tr>

@@ -45,7 +45,10 @@ function Summary() {
       const params = {};
       if (department) params.department = department;
       if (semester) params.semester = semester;
-      const res = await api.get("/summary/export/excel", { params, responseType: "blob" });
+      const res = await api.get("/summary/export/excel", {
+        params,
+        responseType: "blob",
+      });
       downloadFile(res.data, "Summary.xlsx");
     } catch (err) {
       console.error("Excel export failed:", err);
@@ -57,7 +60,10 @@ function Summary() {
       const params = {};
       if (department) params.department = department;
       if (semester) params.semester = semester;
-      const res = await api.get("/summary/export/pdf", { params, responseType: "blob" });
+      const res = await api.get("/summary/export/pdf", {
+        params,
+        responseType: "blob",
+      });
       downloadFile(res.data, "Summary.pdf");
     } catch (err) {
       console.error("PDF export failed:", err);
@@ -130,8 +136,8 @@ function Summary() {
         </div>
 
         {/* Table */}
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <table className="w-full text-sm text-left">
+        <div className="bg-white shadow-md rounded-lg overflow-x-auto">
+          <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-slate-100 text-slate-700">
               <tr>
                 <th className="px-4 py-3 font-semibold">Name</th>
@@ -144,19 +150,28 @@ function Summary() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
+                  <td
+                    colSpan={5}
+                    className="px-4 py-6 text-center text-slate-400"
+                  >
                     Loading...
                   </td>
                 </tr>
               ) : summary.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
+                  <td
+                    colSpan={5}
+                    className="px-4 py-6 text-center text-slate-400"
+                  >
                     No matching records found
                   </td>
                 </tr>
               ) : (
                 summary.map((entry) => (
-                  <tr key={entry.examinerId} className="border-t border-slate-200">
+                  <tr
+                    key={entry.examinerId}
+                    className="border-t border-slate-200"
+                  >
                     <td className="px-4 py-3">{entry.name}</td>
                     <td className="px-4 py-3">{entry.accountNumber}</td>
                     <td className="px-4 py-3">{entry.ifscCode}</td>
@@ -171,7 +186,10 @@ function Summary() {
             {summary.length > 0 && (
               <tfoot>
                 <tr className="border-t-2 border-slate-300 bg-slate-50">
-                  <td colSpan={4} className="px-4 py-3 font-semibold text-slate-700 text-right">
+                  <td
+                    colSpan={4}
+                    className="px-4 py-3 font-semibold text-slate-700 text-right"
+                  >
                     Grand Total
                   </td>
                   <td className="px-4 py-3 font-bold text-blue-700">
