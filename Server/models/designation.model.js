@@ -4,7 +4,6 @@ const designationSchema = new mongoose.Schema({
     title : {
         type : String,
         required : [true, "Designation title is required"],
-        unique : true,
         trim : true,
     },
     rate : {

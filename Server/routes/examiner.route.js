@@ -1,12 +1,14 @@
 import express from "express"
 import {protect} from "../middleware/auth.middleware.js"
-import { addDesignation, addExaminer, getDesignation, getExaminer } from "../controllers/examiner.controller.js"
+import { addDesignation, addExaminer, deleteExaminer, getExaminer, updateExaminer } from "../controllers/examiner.controller.js"
+import mcaOnly from "../middleware/mca.middleware.js";
 
 const examinerRouter = express.Router()
 
-examinerRouter.post("/add" , protect,addExaminer);
 examinerRouter.get("/all",protect,getExaminer);
-examinerRouter.get("/designations",protect,getDesignation);
+examinerRouter.post("/add" , protect,addExaminer);
+examinerRouter.put("/:id" , protect , mcaOnly , updateExaminer);
+examinerRouter.delete("/:id" , protect , mcaOnly , deleteExaminer);
 examinerRouter.post("/designation/add",protect,addDesignation);
 
 

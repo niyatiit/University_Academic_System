@@ -7,7 +7,7 @@ import userRouter from "./routes/user.route.js"
 import examinerRouter from './routes/examiner.route.js'
 import theoryRouter from "./routes/theory.route.js"
 import practicalRouter from "./routes/practical.route.js"
-import bankRouter from "./routes/bank.route.js"
+
 
 
 //load env variable
@@ -23,7 +23,7 @@ const app = express();
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended : true}))
-app.use(cors());
+
 
 
 // Test Routes
@@ -40,7 +40,7 @@ app.use("/api/user", userRouter)
 app.use("/api/examiner",examinerRouter );
 app.use("/api/theory", theoryRouter);
 app.use("/api/practical", practicalRouter);
-app.use("/api/bank", bankRouter);
+
 
 const PORT = process.env.PORT || 3000
 

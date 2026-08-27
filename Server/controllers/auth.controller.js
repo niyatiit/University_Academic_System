@@ -56,7 +56,7 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Email and Password are required" });
     }
 
-    console.log("Login attempt with email:", email);  // 👈 add this
+    // console.log("Login attempt with email:", email);  // 👈 add this
 
     const user = await User.findOne({ email });
     console.log("Found user:", user);  // 👈 add this
@@ -66,7 +66,7 @@ const login = async (req, res) => {
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log("Password match:", isMatch);  // 👈 add this
+    // console.log("Password match:", isMatch);  // 👈 add this
 
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid Email or password" });

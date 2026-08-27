@@ -5,14 +5,42 @@ import Examiner from "../models/examiner.model.js";
 // @route  POST /api/examiner/add
 const addExaminer = async (req, res) => {
   try {
-    const { name, designationTitle, rate } = req.body;
+    const { name, designationTitle, rate, accountNumber, ifscCode, bankName } =
+      req.body;
 
-    if (!name || !designationTitle || !rate) {
+    if (
+      !name ||
+      !designationTitle ||
+      !rate ||
+      !accountNumber ||
+      !ifscCode ||
+      !bankName
+    ) {
       return res.status(400).json({
-        message: "Name, designation, and rate are required",
+        message: "All fields are required",
       });
     }
 
+    const accountPattern = /^\d{9,18}$/;
+    if (!accountPattern.test(accountNumber)) {
+      return res.status(400).json({
+        message: "Account number must be 9-18 digits (numbers only)",
+      });
+    }
+
+    const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+    if (!ifscPattern.test(ifscCode.toUpperCase())) {
+      return res.status(400).json({
+        message: "Invalid IFSC code format (e.g. SBIN0001234)",
+      });
+    }
+
+    const existingAccount = await Examiner.findOne({ accountNumber });
+    if (existingAccount) {
+      return res.status(400).json({
+        message: "This account number already exists",
+      });
+    }
     // Check if designation already exists (case-insensitive match)
     let designation = await Designation.findOne({
       title: { $regex: `^${designationTitle.trim()}$`, $options: "i" },
@@ -33,6 +61,9 @@ const addExaminer = async (req, res) => {
     const examiner = await Examiner.create({
       name,
       designation: designation._id,
+      accountNumber,
+      ifscCode: ifscCode.toUpperCase(),
+      bankName,
     });
 
     // Populate designation before sending back
@@ -46,6 +77,88 @@ const addExaminer = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+
+// @desc   Update examiner
+// @route  PUT /api/examiner/:id
+const updateExaminer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, designationTitle, rate, accountNumber, ifscCode, bankName } = req.body;
+
+    const examiner = await Examiner.findById(id);
+    if (!examiner) {
+      return res.status(404).json({ message: "Examiner not found" });
+    }
+
+    if (accountNumber && accountNumber !== examiner.accountNumber) {
+      const accountPattern = /^\d{9,18}$/;
+      if (!accountPattern.test(accountNumber)) {
+        return res.status(400).json({
+          message: "Account number must be 9-18 digits (numbers only)",
+        });
+      }
+      const existingAccount = await Examiner.findOne({ accountNumber, _id: { $ne: id } });
+      if (existingAccount) {
+        return res.status(400).json({ message: "This account number already exists" });
+      }
+      examiner.accountNumber = accountNumber;
+    }
+
+    if (ifscCode) {
+      const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+      if (!ifscPattern.test(ifscCode.toUpperCase())) {
+        return res.status(400).json({
+          message: "Invalid IFSC code format (e.g. SBIN0001234)",
+        });
+      }
+      examiner.ifscCode = ifscCode.toUpperCase();
+    }
+
+    if (name) examiner.name = name;
+    if (bankName) examiner.bankName = bankName;
+
+    if (designationTitle && rate) {
+      let designation = await Designation.findOne({
+        title: { $regex: `^${designationTitle.trim()}$`, $options: "i" },
+      });
+      if (designation) {
+        designation.rate = rate;
+        await designation.save();
+      } else {
+        designation = await Designation.create({ title: designationTitle.trim(), rate });
+      }
+      examiner.designation = designation._id;
+    }
+
+    await examiner.save();
+    await examiner.populate("designation");
+
+    res.status(200).json({ message: "Examiner updated successfully", examiner });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+// @desc   Delete examiner
+// @route  DELETE /api/examiner/:id
+const deleteExaminer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const examiner = await Examiner.findByIdAndDelete(id);
+
+    if (!examiner) {
+      return res.status(404).json({ message: "Examiner not found" });
+    }
+
+    res.status(200).json({ message: "Examiner deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
 
 // @desc   Get all examiners (for dropdown)
 // @route  GET /api/examiner/all
@@ -64,17 +177,14 @@ const getExaminer = async (req, res) => {
   }
 };
 
-// @desc   Get all designations (for dropdown)
-// @route  GET /api/examiner/designations
-const getDesignation = async (req, res) => {
+// @desc   Get all examiners
+// @route  GET /api/examiner/all
+const getExaminers = async (req, res) => {
   try {
-    const designations = await Designation.find();
-
-    return res.status(200).json(designations);
+    const examiners = await Examiner.find().populate("designation", "title rate");
+    res.status(200).json(examiners);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -106,4 +216,4 @@ const addDesignation = async (req, res) => {
       .json({ message: "Server error", error: error.message });
   }
 };
-export { addExaminer, getExaminer, getDesignation, addDesignation };
+export { addExaminer,updateExaminer , deleteExaminer, getExaminer, addDesignation };
