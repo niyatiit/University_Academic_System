@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: "https://university-academic-system.onrender.com/api",
 });
 
 // Attach token automatically to every request (if logged in)
