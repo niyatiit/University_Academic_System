@@ -1,5 +1,7 @@
 # Academic Payment Portal
 
+🔗 **Live Demo:** [https://university-academic-system-six.vercel.app/](https://university-academic-system-six.vercel.app/)
+
 A full-stack **MERN** application to manage examiner remuneration for theory and practical examinations — from recording exam duty payments to storing bank details for disbursement, with department and semester-wise tracking and reporting.
 
 ## Overview
