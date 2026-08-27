@@ -7,6 +7,7 @@ import userRouter from "./routes/user.route.js"
 import examinerRouter from './routes/examiner.route.js'
 import theoryRouter from "./routes/theory.route.js"
 import practicalRouter from "./routes/practical.route.js"
+import summaryRouter from "./routes/summary.route.js"
 
 
 
@@ -40,6 +41,7 @@ app.use("/api/user", userRouter)
 app.use("/api/examiner",examinerRouter );
 app.use("/api/theory", theoryRouter);
 app.use("/api/practical", practicalRouter);
+app.use("/api/summary", summaryRouter);
 
 
 const PORT = process.env.PORT || 3000
