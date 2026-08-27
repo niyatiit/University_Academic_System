@@ -9,7 +9,6 @@ import Dashboard from "./pages/Dashboard";
 import AddExaminer from "./pages/AddExaminer";
 import TheoryExamination from "./pages/TheoryExamination";
 import PracticalExamination from "./pages/PracticalExamination";
-import BankDetails from "./pages/BankDetails";
 import Summary from "./pages/Summary";
 
 function App() {
@@ -34,7 +33,7 @@ function App() {
             <Route
               path="/add-examiner"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute mcaOnly>
                   <AddExaminer />
                 </ProtectedRoute>
               }
@@ -52,14 +51,6 @@ function App() {
               element={
                 <ProtectedRoute>
                   <PracticalExamination />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/bank-details"
-              element={
-                <ProtectedRoute>
-                  <BankDetails />
                 </ProtectedRoute>
               }
             />

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../components/DashboardLayout";
 import api from "../api/axios";
+import { downloadFile } from "../utils/downloadFile";
 
 const masterDepartments = ["MBA", "MCA"];
 const allDepartments = ["BBA", "MBA", "BCA", "MCA", "JMC", "B.TECH", "BCOM"];
@@ -25,7 +26,7 @@ function Summary() {
       if (department) params.department = department;
       if (semester) params.semester = semester;
 
-      const res = await api.get("/bank/summary", { params });
+      const res = await api.get("/summary", { params });
       setSummary(res.data.summary);
     } catch (err) {
       console.error("Failed to fetch summary:", err);
@@ -39,12 +40,52 @@ function Summary() {
     setSemester("");
   };
 
+  const handleExportExcel = async () => {
+    try {
+      const params = {};
+      if (department) params.department = department;
+      if (semester) params.semester = semester;
+      const res = await api.get("/summary/export/excel", { params, responseType: "blob" });
+      downloadFile(res.data, "Summary.xlsx");
+    } catch (err) {
+      console.error("Excel export failed:", err);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      const params = {};
+      if (department) params.department = department;
+      if (semester) params.semester = semester;
+      const res = await api.get("/summary/export/pdf", { params, responseType: "blob" });
+      downloadFile(res.data, "Summary.pdf");
+    } catch (err) {
+      console.error("PDF export failed:", err);
+    }
+  };
+
   const grandTotal = summary.reduce((sum, entry) => sum + entry.amount, 0);
 
   return (
     <DashboardLayout>
       <div className="p-8 max-w-5xl">
-        <h1 className="text-2xl font-bold text-slate-800 mb-6">Summary</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-slate-800">Summary</h1>
+          <div className="flex gap-2">
+            <button
+              onClick={handleExportExcel}
+              className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
+            >
+              Export Excel
+            </button>
+            <button
+              onClick={handleExportPDF}
+              className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
+            >
+              Export PDF
+            </button>
+          </div>
+        </div>
 
         {/* Filters */}
         <div className="bg-white shadow-md rounded-lg p-6 mb-6 flex flex-col sm:flex-row gap-4">
