@@ -21,7 +21,13 @@ connectDB()
 const app = express();
 
 //middlwares use
-app.use(cors())
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://university-academic-system-six.vercel.app",
+  ],
+  credentials: true,
+}))
 app.use(express.json())
 app.use(express.urlencoded({ extended : true}))
 
