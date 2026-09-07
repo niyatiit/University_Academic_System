@@ -8,6 +8,8 @@ function PracticalExamination() {
   const [entries, setEntries] = useState([]);
   const [formData, setFormData] = useState({
     examiner: "",
+    designation: "",
+    rate: "",
     totalDays: "",
     date: "",
     subjectCode: "",
@@ -47,8 +49,7 @@ function PracticalExamination() {
   };
 
   const selectedExaminer = examiners.find((ex) => ex._id === formData.examiner);
-  const rate = selectedExaminer ? selectedExaminer.designation.rate : 0;
-  const totalDaysNum = Number(formData.totalDays) || 0;
+  const rate = Number(formData.rate) || 0; const totalDaysNum = Number(formData.totalDays) || 0;
   const taNum = Number(formData.ta) || 0;
   const daNum = Number(formData.da) || 0;
   const honorariumNum = Number(formData.honorarium) || 0;
@@ -74,6 +75,8 @@ function PracticalExamination() {
       setMessage({ type: "success", text: res.data.message });
       setFormData({
         examiner: "",
+        designation: "",
+        rate: "",
         totalDays: "",
         date: "",
         subjectCode: "",
@@ -152,12 +155,12 @@ function PracticalExamination() {
               </label>
               <input
                 type="text"
-                value={
-                  selectedExaminer ? selectedExaminer.designation.title : ""
-                }
-                readOnly
-                placeholder="Auto-filled"
-                className="w-full border border-slate-300 rounded-md px-3 py-2 bg-slate-100 text-slate-600"
+                name="designation"
+                value={formData.designation}
+                onChange={handleChange}
+                placeholder="Enter designation"
+                className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
               />
             </div>
 
@@ -166,11 +169,14 @@ function PracticalExamination() {
                 Rate (₹/day)
               </label>
               <input
-                type="text"
-                value={selectedExaminer ? `₹${rate}` : ""}
-                readOnly
-                placeholder="Auto-filled"
-                className="w-full border border-slate-300 rounded-md px-3 py-2 bg-slate-100 text-slate-600"
+                type="number"
+                name="rate"
+                min="0"
+                value={formData.rate}
+                onChange={handleChange}
+                placeholder="Enter rate"
+                className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
               />
             </div>
 
@@ -339,9 +345,8 @@ function PracticalExamination() {
 
           {message.text && (
             <p
-              className={`text-sm font-medium ${
-                message.type === "success" ? "text-green-600" : "text-red-600"
-              }`}
+              className={`text-sm font-medium ${message.type === "success" ? "text-green-600" : "text-red-600"
+                }`}
             >
               {message.text}
             </p>
@@ -378,7 +383,7 @@ function PracticalExamination() {
               {entries.map((entry) => (
                 <tr key={entry._id} className="border-t border-slate-200">
                   <td className="px-4 py-3">{entry.examiner?.name}</td>
-                  <td className="px-4 py-3">{entry.designation?.title}</td>
+                  <td className="px-4 py-3">{entry.designation}</td>
                   <td className="px-4 py-3">₹{entry.rate}</td>
                   <td className="px-4 py-3">{entry.totalDays}</td>
                   <td className="px-4 py-3">

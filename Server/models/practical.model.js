@@ -8,9 +8,9 @@ const practicalSchema = new mongoose.Schema(
       required: [true, "Examiner is required"],
     },
     designation: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Designation",
+      type: String,
       required: [true, "Designation is required"],
+      trim: true,
     },
     rate: {
       type: Number,

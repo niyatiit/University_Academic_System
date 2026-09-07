@@ -6,6 +6,8 @@ const addPractical = async (req, res) => {
   try {
     const {
       examiner,
+      designation,
+      rate,
       totalDays,
       date,
       subjectCode,
@@ -19,6 +21,8 @@ const addPractical = async (req, res) => {
 
     if (
       !examiner ||
+      !designation ||
+      !rate ||
       !totalDays ||
       !date ||
       !subjectCode ||
@@ -27,37 +31,28 @@ const addPractical = async (req, res) => {
     ) {
       return res.status(400).json({
         message:
-          "Examiner, total days, date, subject code, department, and semester are required",
+          "Examiner, designation, rate, total days, date, subject code, department, and semester are required",
       });
     }
-// Validate subject code format
-const subjectCodePattern = /^[A-Za-z]{2,5}\d{2,4}$/;
-if (!subjectCodePattern.test(subjectCode)) {
-  return res.status(400).json({
-    message: "Subject code must be letters followed by numbers (e.g. CS101)",
-  });
-}
-    const examinerData =
-      await Examiner.findById(examiner).populate("designation");
+
+    const examinerData = await Examiner.findById(examiner);
 
     if (!examinerData) {
       return res.status(400).json({ message: "Invalid Examiner Selected" });
     }
 
-    const rate = examinerData.designation.rate;
-
-    // Convert everything to actual numbers first
+    const rateNum = Number(rate);
     const daysNum = Number(totalDays);
     const taAmount = Number(ta) || 0;
     const daAmount = Number(da) || 0;
     const honorariumAmount = Number(honorarium) || 0;
 
-    const total = rate * daysNum + taAmount + daAmount + honorariumAmount;
+    const total = rateNum * daysNum + taAmount + daAmount + honorariumAmount;
 
     const practical = await Practical.create({
       examiner,
-      designation: examinerData.designation._id,
-      rate,
+      designation,
+      rate: rateNum,
       totalDays: daysNum,
       date,
       subjectCode,
@@ -81,13 +76,11 @@ if (!subjectCodePattern.test(subjectCode)) {
 
 const getPractical = async (req, res) => {
   try {
-    const practicalExams = await Practical.find()
-      .populate("examiner", "name")
-      .populate("designation", "title");
+    const practicalExams = await Practical.find().populate("examiner", "name");
 
     return res
       .status(200)
-      .json({ message: "Fetched data succesfully", practicalExams });
+      .json({ message: "Fetched data successfully", practicalExams });
   } catch (error) {
     return res
       .status(400)
@@ -97,9 +90,7 @@ const getPractical = async (req, res) => {
 
 const exportPracticalExcel = async (req, res) => {
   try {
-    const practicalExams = await Practical.find()
-      .populate("examiner", "name")
-      .populate("designation", "title");
+    const practicalExams = await Practical.find().populate("examiner", "name");
 
     const columns = [
       { header: "Examiner Name", key: "examinerName", width: 22 },
@@ -117,7 +108,7 @@ const exportPracticalExcel = async (req, res) => {
 
     const rows = practicalExams.map((item) => ({
       examinerName: item.examiner?.name || "N/A",
-      designationTitle: item.designation?.title || "N/A",
+      designationTitle: item.designation || "N/A",
       rate: item.rate,
       totalDays: item.totalDays,
       date: item.date ? new Date(item.date).toLocaleDateString() : "",
