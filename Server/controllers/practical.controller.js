@@ -88,6 +88,101 @@ const getPractical = async (req, res) => {
   }
 };
 
+const updatePractical = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      examiner,
+      designation,
+      rate,
+      totalDays,
+      date,
+      subjectCode,
+      ta,
+      da,
+      honorarium,
+      department,
+      semester,
+    } = req.body;
+
+    if (
+      !examiner ||
+      !designation ||
+      !rate ||
+      !totalDays ||
+      !date ||
+      !subjectCode ||
+      !department ||
+      !semester
+    ) {
+      return res.status(400).json({
+        message:
+          "Examiner, designation, rate, total days, date, subject code, department, and semester are required",
+      });
+    }
+
+    const examinerData = await Examiner.findById(examiner);
+    if (!examinerData) {
+      return res.status(400).json({ message: "Invalid Examiner Selected" });
+    }
+
+    const rateNum = Number(rate);
+    const daysNum = Number(totalDays);
+    const taAmount = Number(ta) || 0;
+    const daAmount = Number(da) || 0;
+    const honorariumAmount = Number(honorarium) || 0;
+    const total = rateNum * daysNum + taAmount + daAmount + honorariumAmount;
+
+    const updated = await Practical.findByIdAndUpdate(
+      id,
+      {
+        examiner,
+        designation,
+        rate: rateNum,
+        totalDays: daysNum,
+        date,
+        subjectCode,
+        department,
+        semester: Number(semester),
+        ta: taAmount,
+        da: daAmount,
+        honorarium: honorariumAmount,
+        total,
+      },
+      { new: true, runValidators: true },
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Entry not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Entry updated successfully", practical: updated });
+  } catch (error) {
+    return res
+      .status(400)
+      .json({ message: "Server Error", error: error.message });
+  }
+};
+
+const deletePractical = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Practical.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Entry not found" });
+    }
+
+    return res.status(200).json({ message: "Entry deleted successfully" });
+  } catch (error) {
+    return res
+      .status(400)
+      .json({ message: "Server Error", error: error.message });
+  }
+};
+
 const exportPracticalExcel = async (req, res) => {
   try {
     const practicalExams = await Practical.find().populate("examiner", "name");
@@ -185,4 +280,11 @@ const exportPracticalPDF = async (req, res) => {
   }
 };
 
-export { addPractical, getPractical, exportPracticalExcel, exportPracticalPDF };
+export {
+  addPractical,
+  getPractical,
+  updatePractical,
+  deletePractical,
+  exportPracticalExcel,
+  exportPracticalPDF,
+};

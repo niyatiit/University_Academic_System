@@ -5,12 +5,16 @@ import {
   exportTheoryExcel,
   exportTheoryPDF,
   getTheoryExam,
+  updateTheoryExam,
+  deleteTheoryExam,
 } from "../controllers/theory.controller.js";
 
 const theoryRouter = express.Router();
 
 theoryRouter.post("/add", protect, addTheoryExam);
 theoryRouter.get("/all", protect, getTheoryExam);
+theoryRouter.put("/update/:id", protect, updateTheoryExam);
+theoryRouter.delete("/delete/:id", protect, deleteTheoryExam);
 theoryRouter.get("/export/excel", protect, exportTheoryExcel);
 theoryRouter.get("/export/pdf", protect, exportTheoryPDF);
 

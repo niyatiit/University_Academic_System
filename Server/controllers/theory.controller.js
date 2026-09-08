@@ -66,9 +66,85 @@ const getTheoryExam = async (req, res) => {
   }
 };
 
+const updateTheoryExam = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { examiner, designation, rate, totalDays, department, semester } =
+      req.body;
+
+    if (
+      !examiner ||
+      !designation ||
+      !rate ||
+      !totalDays ||
+      !department ||
+      !semester
+    ) {
+      return res.status(400).json({
+        message:
+          "Examiner, designation, rate, total days, department, and semester are required",
+      });
+    }
+
+    const examinerData = await Examiner.findById(examiner);
+    if (!examinerData) {
+      return res.status(400).json({ message: "Invalid Examiner selected" });
+    }
+
+    const rateNum = Number(rate);
+    const daysNum = Number(totalDays);
+    const totalRemuneration = rateNum * daysNum;
+
+    const updated = await Theory.findByIdAndUpdate(
+      id,
+      {
+        examiner,
+        designation,
+        rate: rateNum,
+        totalDays: daysNum,
+        department,
+        semester: Number(semester),
+        totalRemuneration,
+      },
+      { new: true, runValidators: true },
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Entry not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Entry updated successfully", theoryExam: updated });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+const deleteTheoryExam = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Theory.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Entry not found" });
+    }
+
+    return res.status(200).json({ message: "Entry deleted successfully" });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
 const exportTheoryExcel = async (req, res) => {
   try {
-    const theoryExams = await Theory.find().populate("designation", "title");
+    const theoryExams = await Theory.find().populate("examiner", "name");
 
     const columns = [
       { header: "Examiner Name", key: "examinerName", width: 25 },
@@ -141,4 +217,11 @@ const exportTheoryPDF = async (req, res) => {
   }
 };
 
-export { addTheoryExam, getTheoryExam, exportTheoryExcel, exportTheoryPDF };
+export {
+  addTheoryExam,
+  getTheoryExam,
+  updateTheoryExam,
+  deleteTheoryExam,
+  exportTheoryExcel,
+  exportTheoryPDF,
+};

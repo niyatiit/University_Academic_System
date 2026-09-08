@@ -16,6 +16,7 @@ function TheoryExamination() {
   });
   const [message, setMessage] = useState({ type: "", text: "" });
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const masterDepartments = ["MBA", "MCA"];
   const allDepartments = ["BBA", "MBA", "BCA", "MCA", "JMC", "B.TECH", "BCOM"];
 
@@ -57,32 +58,64 @@ function TheoryExamination() {
     setMessage({ type: "", text: "" });
   };
 
+  const resetForm = () => {
+    setFormData({
+      examiner: "",
+      designation: "",
+      rate: "",
+      totalDays: "",
+      department: "",
+      semester: "",
+    });
+    setEditingId(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: "", text: "" });
-    console.log("Submitting formData:", formData);
 
     try {
-      const res = await api.post("/theory/add", formData);
+      const res = editingId
+        ? await api.put(`/theory/update/${editingId}`, formData)
+        : await api.post("/theory/add", formData);
       setMessage({ type: "success", text: res.data.message });
-      setFormData({
-        examiner: "",
-        designation: "",
-        rate: "",
-        totalDays: "",
-        department: "",
-        semester: "",
-      });
+      resetForm();
       fetchEntries();
     } catch (err) {
-      alert(JSON.stringify(err.response?.data)); // 👈 TEMPORARY - shows exact error as popup
       setMessage({
         type: "error",
-        text: err.response?.data?.message || "Failed to add entry",
+        text:
+          err.response?.data?.message ||
+          `Failed to ${editingId ? "update" : "add"} entry`,
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEdit = (entry) => {
+    setEditingId(entry._id);
+    setFormData({
+      examiner: entry.examiner?._id || "",
+      designation: entry.designation?.title || entry.designation || "",
+      rate: entry.rate ?? "",
+      totalDays: entry.totalDays ?? "",
+      department: entry.department?.title || entry.department || "",
+      semester: entry.semester ?? "",
+    });
+    setMessage({ type: "", text: "" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this entry? This cannot be undone.")) return;
+    try {
+      await api.delete(`/theory/delete/${id}`);
+      if (editingId === id) resetForm();
+      fetchEntries();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete entry");
     }
   };
 
