@@ -4,29 +4,37 @@ import { generateExcel, generatePDF } from "../utils/export.util.js";
 
 const addTheoryExam = async (req, res) => {
   try {
-    const { examiner, totalDays, department, semester } = req.body;
+    const { examiner, designation, rate, totalDays, department, semester } =
+      req.body;
 
-    if (!examiner || !totalDays || !department || !semester) {
+    if (
+      !examiner ||
+      !designation ||
+      !rate ||
+      !totalDays ||
+      !department ||
+      !semester
+    ) {
       return res.status(400).json({
-        message: "Examiner, total days, department, and semester are required",
+        message:
+          "Examiner, designation, rate, total days, department, and semester are required",
       });
     }
 
-    const examinerData =
-      await Examiner.findById(examiner).populate("designation");
+    const examinerData = await Examiner.findById(examiner);
 
     if (!examinerData) {
       return res.status(400).json({ message: "Invalid Examiner selected" });
     }
 
-    const rate = examinerData.designation.rate;
+    const rateNum = Number(rate);
     const daysNum = Number(totalDays);
-    const totalRemuneration = rate * daysNum;
+    const totalRemuneration = rateNum * daysNum;
 
     const theoryExam = await Theory.create({
       examiner,
-      designation: examinerData.designation._id,
-      rate,
+      designation,
+      rate: rateNum,
       totalDays: daysNum,
       department,
       semester: Number(semester),
@@ -45,9 +53,7 @@ const addTheoryExam = async (req, res) => {
 
 const getTheoryExam = async (req, res) => {
   try {
-    const theoryExams = await Theory.find()
-      .populate("examiner", "name")
-      .populate("designation", "title");
+    const theoryExams = await Theory.find().populate("examiner", "name");
 
     return res
       .status(200)
@@ -62,9 +68,7 @@ const getTheoryExam = async (req, res) => {
 
 const exportTheoryExcel = async (req, res) => {
   try {
-    const theoryExams = await Theory.find()
-      .populate("examiner", "name")
-      .populate("designation", "title");
+    const theoryExams = await Theory.find().populate("examiner", "name");
 
     const columns = [
       { header: "Examiner Name", key: "examinerName", width: 25 },
@@ -76,7 +80,7 @@ const exportTheoryExcel = async (req, res) => {
 
     const rows = theoryExams.map((item) => ({
       examinerName: item.examiner?.name || "N/A",
-      designationTitle: item.designation?.title || "N/A",
+      designationTitle: item.designation || "N/A",
       rate: item.rate,
       totalDays: item.totalDays,
       totalRemuneration: item.totalRemuneration,
@@ -86,9 +90,12 @@ const exportTheoryExcel = async (req, res) => {
 
     res.setHeader(
       "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
-    res.setHeader("Content-Disposition", "attachment; filename=TheoryExamination.xlsx");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=TheoryExamination.xlsx",
+    );
     res.send(buffer);
   } catch (error) {
     res.status(400).json({ message: "Server error", error: error.message });
@@ -117,10 +124,17 @@ const exportTheoryPDF = async (req, res) => {
       totalRemuneration: item.totalRemuneration,
     }));
 
-    const buffer = await generatePDF("Theory Examination Report", columns, rows);
+    const buffer = await generatePDF(
+      "Theory Examination Report",
+      columns,
+      rows,
+    );
 
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "attachment; filename=TheoryExamination.pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=TheoryExamination.pdf",
+    );
     res.send(buffer);
   } catch (error) {
     res.status(400).json({ message: "Server error", error: error.message });

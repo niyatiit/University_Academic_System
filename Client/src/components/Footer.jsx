@@ -6,8 +6,8 @@ function Footer() {
           {" "}
           <b>
             &copy; {new Date().getFullYear()} Academic Payment Portal. Built by
-            Niyati Patel, MCA Sem 3 Student at Sardar Vallabhbhai Global
-            University.
+            Niyati Patel, MCA Student (Batch 2025–2027) at Sardar Vallabhbhai
+            Global University.
           </b>
         </p>
         <div className="flex items-center gap-5">
@@ -34,7 +34,7 @@ function Footer() {
             rel="noopener noreferrer"
             className="hover:text-blue-400 transition-colors"
           >
-             <svg
+            <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"

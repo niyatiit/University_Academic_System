@@ -7,11 +7,11 @@ const theorySchema = new mongoose.Schema(
       ref: "Examiner",
       required: [true, "Examiner is required"],
     },
-    designation: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Designation",
-      required: [true, "Designation is required"],
-    },
+   designation: {
+  type: String,
+  required: [true, "Designation is required"],
+  trim: true,
+},
     rate: {
       type: Number,
       required: [true, "rate is required"],
