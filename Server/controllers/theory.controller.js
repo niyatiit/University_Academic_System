@@ -68,7 +68,7 @@ const getTheoryExam = async (req, res) => {
 
 const exportTheoryExcel = async (req, res) => {
   try {
-    const theoryExams = await Theory.find().populate("examiner", "name");
+    const theoryExams = await Theory.find().populate("designation", "title");
 
     const columns = [
       { header: "Examiner Name", key: "examinerName", width: 25 },

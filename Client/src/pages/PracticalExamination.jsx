@@ -13,7 +13,7 @@ function PracticalExamination() {
     totalDays: "",
     date: "",
     subjectCode: "",
-    personName: "",
+   
     ta: "",
     da: "",
     honorarium: "",
@@ -80,7 +80,7 @@ function PracticalExamination() {
         totalDays: "",
         date: "",
         subjectCode: "",
-        personName: "",
+       
         ta: "",
         da: "",
         honorarium: "",
@@ -272,7 +272,7 @@ function PracticalExamination() {
               />
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Name of Person{" "}
                 <span className="text-slate-400 font-normal">(optional)</span>
@@ -285,7 +285,7 @@ function PracticalExamination() {
                 placeholder="Enter name (optional)"
                 className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-            </div>
+            </div> */}
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -372,7 +372,7 @@ function PracticalExamination() {
                 <th className="px-4 py-3 font-semibold">Days</th>
                 <th className="px-4 py-3 font-semibold">Date</th>
                 <th className="px-4 py-3 font-semibold">Subject Code</th>
-                <th className="px-4 py-3 font-semibold">Person</th>
+                {/* <th className="px-4 py-3 font-semibold">Person</th> */}
                 <th className="px-4 py-3 font-semibold">TA</th>
                 <th className="px-4 py-3 font-semibold">DA</th>
                 <th className="px-4 py-3 font-semibold">Honorarium</th>
@@ -383,14 +383,13 @@ function PracticalExamination() {
               {entries.map((entry) => (
                 <tr key={entry._id} className="border-t border-slate-200">
                   <td className="px-4 py-3">{entry.examiner?.name}</td>
-                  <td className="px-4 py-3">{entry.designation}</td>
-                  <td className="px-4 py-3">₹{entry.rate}</td>
+<td className="px-4 py-3">{entry.designation?.title || entry.designation}</td>                  <td className="px-4 py-3">₹{entry.rate}</td>
                   <td className="px-4 py-3">{entry.totalDays}</td>
                   <td className="px-4 py-3">
                     {new Date(entry.date).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">{entry.subjectCode}</td>
-                  <td className="px-4 py-3">{entry.personName || "-"}</td>
+                  {/* <td className="px-4 py-3">{entry.personName || "-"}</td> */}
                   <td className="px-4 py-3">₹{entry.ta}</td>
                   <td className="px-4 py-3">₹{entry.da}</td>
                   <td className="px-4 py-3">₹{entry.honorarium}</td>

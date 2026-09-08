@@ -277,13 +277,17 @@ function TheoryExamination() {
               {entries.map((entry) => (
                 <tr key={entry._id} className="border-t border-slate-200">
                   <td className="px-4 py-3">{entry.examiner?.name}</td>
-                  <td className="px-4 py-3">{entry.designation}</td>
+                  <td className="px-4 py-3">
+                    {entry.designation?.title || entry.designation}
+                  </td>{" "}
                   <td className="px-4 py-3">₹{entry.rate}</td>
                   <td className="px-4 py-3">{entry.totalDays}</td>
                   <td className="px-4 py-3 font-semibold text-blue-600">
                     ₹{entry.totalRemuneration.toLocaleString()}
                   </td>
-                  <td className="px-4 py-3">{entry.department}</td>
+                  <td className="px-4 py-3">
+                    {entry.department?.title || entry.department}
+                  </td>
                   <td className="px-4 py-3">{entry.semester}</td>
                 </tr>
               ))}
