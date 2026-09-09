@@ -29,10 +29,6 @@ const practicalSchema = new mongoose.Schema(
       required: [true, "Subject code is required"],
       trim: true,
       uppercase: true,
-      match: [
-        /^[A-Za-z]{2,5}\d{2,4}$/,
-        "Subject code must be letters followed by numbers (e.g. CS101)",
-      ],
     },
     personName: {
       type: String,
