@@ -13,7 +13,6 @@ function PracticalExamination() {
     totalDays: "",
     date: "",
     subjectCode: "",
-   
     ta: "",
     da: "",
     honorarium: "",
@@ -22,6 +21,7 @@ function PracticalExamination() {
   });
   const [message, setMessage] = useState({ type: "", text: "" });
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const masterDepartments = ["MBA", "MCA"];
   const allDepartments = ["BBA", "MBA", "BCA", "MCA", "JMC", "B.TECH", "BCOM"];
 
@@ -49,7 +49,8 @@ function PracticalExamination() {
   };
 
   const selectedExaminer = examiners.find((ex) => ex._id === formData.examiner);
-  const rate = Number(formData.rate) || 0; const totalDaysNum = Number(formData.totalDays) || 0;
+  const rate = Number(formData.rate) || 0;
+  const totalDaysNum = Number(formData.totalDays) || 0;
   const taNum = Number(formData.ta) || 0;
   const daNum = Number(formData.da) || 0;
   const honorariumNum = Number(formData.honorarium) || 0;
@@ -65,36 +66,75 @@ function PracticalExamination() {
     setMessage({ type: "", text: "" });
   };
 
+  const resetForm = () => {
+    setFormData({
+      examiner: "",
+      designation: "",
+      rate: "",
+      totalDays: "",
+      date: "",
+      subjectCode: "",
+      ta: "",
+      da: "",
+      honorarium: "",
+      department: "",
+      semester: "",
+    });
+    setEditingId(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: "", text: "" });
 
     try {
-      const res = await api.post("/practical/add", formData);
+      const res = editingId
+        ? await api.put(`/practical/update/${editingId}`, formData)
+        : await api.post("/practical/add", formData);
       setMessage({ type: "success", text: res.data.message });
-      setFormData({
-        examiner: "",
-        designation: "",
-        rate: "",
-        totalDays: "",
-        date: "",
-        subjectCode: "",
-       
-        ta: "",
-        da: "",
-        honorarium: "",
-        department: "",
-        semester: "",
-      });
+      resetForm();
       fetchEntries(); // refresh table
     } catch (err) {
+      console.log("Update error:", err.response); // 👈 add this line
       setMessage({
         type: "error",
-        text: err.response?.data?.message || "Failed to add entry",
+        text:
+          err.response?.data?.message ||
+          `Failed to ${editingId ? "update" : "add"} entry`,
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEdit = (entry) => {
+    setEditingId(entry._id);
+    setFormData({
+      examiner: entry.examiner?._id || "",
+      designation: entry.designation?.title || entry.designation || "",
+      rate: entry.rate ?? "",
+      totalDays: entry.totalDays ?? "",
+      date: entry.date ? entry.date.slice(0, 10) : "",
+      subjectCode: entry.subjectCode || "",
+      ta: entry.ta ?? "",
+      da: entry.da ?? "",
+      honorarium: entry.honorarium ?? "",
+      department: entry.department?.title || entry.department || "",
+      semester: entry.semester ?? "",
+    });
+    setMessage({ type: "", text: "" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this entry? This cannot be undone.")) return;
+    try {
+      await api.delete(`/practical/delete/${id}`);
+      if (editingId === id) resetForm();
+      fetchEntries();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete entry");
     }
   };
 
@@ -122,6 +162,19 @@ function PracticalExamination() {
             </button>
           </div>
         </div>
+
+        {editingId && (
+          <div className="mb-4 flex items-center justify-between bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium rounded-md px-4 py-2">
+            Editing entry — update the fields below and submit.
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-amber-700 hover:text-amber-900 underline"
+            >
+              Cancel edit
+            </button>
+          </div>
+        )}
 
         {/* Form */}
         <form
@@ -272,21 +325,6 @@ function PracticalExamination() {
               />
             </div>
 
-            {/* <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Name of Person{" "}
-                <span className="text-slate-400 font-normal">(optional)</span>
-              </label>
-              <input
-                type="text"
-                name="personName"
-                value={formData.personName}
-                onChange={handleChange}
-                placeholder="Enter name (optional)"
-                className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div> */}
-
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Amount of TA
@@ -345,8 +383,9 @@ function PracticalExamination() {
 
           {message.text && (
             <p
-              className={`text-sm font-medium ${message.type === "success" ? "text-green-600" : "text-red-600"
-                }`}
+              className={`text-sm font-medium ${
+                message.type === "success" ? "text-green-600" : "text-red-600"
+              }`}
             >
               {message.text}
             </p>
@@ -357,7 +396,13 @@ function PracticalExamination() {
             disabled={loading}
             className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-medium py-2.5 px-6 rounded-md self-start transition-colors"
           >
-            {loading ? "Submitting..." : "Submit"}
+            {loading
+              ? editingId
+                ? "Updating..."
+                : "Submitting..."
+              : editingId
+                ? "Update Entry"
+                : "Submit"}
           </button>
         </form>
 
@@ -372,29 +417,49 @@ function PracticalExamination() {
                 <th className="px-4 py-3 font-semibold">Days</th>
                 <th className="px-4 py-3 font-semibold">Date</th>
                 <th className="px-4 py-3 font-semibold">Subject Code</th>
-                {/* <th className="px-4 py-3 font-semibold">Person</th> */}
                 <th className="px-4 py-3 font-semibold">TA</th>
                 <th className="px-4 py-3 font-semibold">DA</th>
                 <th className="px-4 py-3 font-semibold">Honorarium</th>
                 <th className="px-4 py-3 font-semibold">Total</th>
+                <th className="px-4 py-3 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
               {entries.map((entry) => (
                 <tr key={entry._id} className="border-t border-slate-200">
                   <td className="px-4 py-3">{entry.examiner?.name}</td>
-<td className="px-4 py-3">{entry.designation?.title || entry.designation}</td>                  <td className="px-4 py-3">₹{entry.rate}</td>
+                  <td className="px-4 py-3">
+                    {entry.designation?.title || entry.designation}
+                  </td>
+                  <td className="px-4 py-3">₹{entry.rate}</td>
                   <td className="px-4 py-3">{entry.totalDays}</td>
                   <td className="px-4 py-3">
                     {new Date(entry.date).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">{entry.subjectCode}</td>
-                  {/* <td className="px-4 py-3">{entry.personName || "-"}</td> */}
                   <td className="px-4 py-3">₹{entry.ta}</td>
                   <td className="px-4 py-3">₹{entry.da}</td>
                   <td className="px-4 py-3">₹{entry.honorarium}</td>
                   <td className="px-4 py-3 font-semibold text-blue-600">
                     ₹{entry.total.toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(entry)}
+                        className="text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(entry._id)}
+                        className="text-red-600 hover:text-red-800 font-medium"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

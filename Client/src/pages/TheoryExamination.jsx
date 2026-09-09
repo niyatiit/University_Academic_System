@@ -83,6 +83,7 @@ function TheoryExamination() {
       resetForm();
       fetchEntries();
     } catch (err) {
+      console.log("Update error:", err.response); // 👈 add this line
       setMessage({
         type: "error",
         text:
@@ -144,7 +145,18 @@ function TheoryExamination() {
             </button>
           </div>
         </div>
-
+        {editingId && (
+          <div className="mb-4 flex items-center justify-between bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium rounded-md px-4 py-2">
+            Editing entry — update the fields below and submit.
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-amber-700 hover:text-amber-900 underline"
+            >
+              Cancel edit
+            </button>
+          </div>
+        )}
         {/* Form */}
         <form
           onSubmit={handleSubmit}
@@ -288,7 +300,13 @@ function TheoryExamination() {
             disabled={loading}
             className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-medium py-2.5 px-6 rounded-md self-start transition-colors"
           >
-            {loading ? "Submitting..." : "Submit"}
+            {loading
+              ? editingId
+                ? "Updating..."
+                : "Submitting..."
+              : editingId
+                ? "Update Entry"
+                : "Submit"}
           </button>
         </form>
 
@@ -304,6 +322,7 @@ function TheoryExamination() {
                 <th className="px-4 py-3 font-semibold">Total Remuneration</th>
                 <th className="px-4 py-3 font-semibold">Department</th>
                 <th className="px-4 py-3 font-semibold">Semester</th>
+                <th className="px-4 py-3 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -322,6 +341,24 @@ function TheoryExamination() {
                     {entry.department?.title || entry.department}
                   </td>
                   <td className="px-4 py-3">{entry.semester}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(entry)}
+                        className="text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(entry._id)}
+                        className="text-red-600 hover:text-red-800 font-medium"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
               {entries.length === 0 && (
