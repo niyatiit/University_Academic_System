@@ -317,9 +317,9 @@ function PracticalExamination() {
                 name="subjectCode"
                 value={formData.subjectCode}
                 onChange={handleChange}
-                placeholder="e.g. CS101"
-                pattern="[A-Za-z]{2,5}[0-9]{2,4}"
-                title="Letters followed by numbers, e.g. CS101"
+                placeholder="e.g. CS10101"
+                // pattern="[A-Za-z]{2,5}[0-9]{2,4}"
+                title="Letters followed by numbers, e.g. CS10101"
                 className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
                 required
               />
