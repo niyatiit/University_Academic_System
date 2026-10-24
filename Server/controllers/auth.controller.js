@@ -15,6 +15,12 @@ const register = async (req, res) => {
       return res.status(400).json({ message: "All Fields are requierd " });
     }
 
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      return res
+        .status(400)
+        .json({ message: "Please enter a valid email address" });
+    }
     const validDepartment = ["BCA", "MCA", "BBA", "MBA", "B.TECH", "JMC"];
     if (!validDepartment.includes(department)) {
       return res.status(400).json({ message: "Invalid Department selected" });
@@ -53,13 +59,15 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and Password are required" });
+      return res
+        .status(400)
+        .json({ message: "Email and Password are required" });
     }
 
     // console.log("Login attempt with email:", email);  // 👈 add this
 
     const user = await User.findOne({ email });
-    console.log("Found user:", user);  // 👈 add this
+    console.log("Found user:", user); // 👈 add this
 
     if (!user) {
       return res.status(400).json({ message: "Invalid Email or Password" });
@@ -76,8 +84,10 @@ const login = async (req, res) => {
 
     return res.status(200).json({ message: "Login Successfully", token, user });
   } catch (error) {
-    return res.status(500).json({ message: "Server Error", error: error.message }); // 👈 also fix this bug
+    return res
+      .status(500)
+      .json({ message: "Server Error", error: error.message }); // 👈 also fix this bug
   }
 };
 
-export {register , login}
+export { register, login };

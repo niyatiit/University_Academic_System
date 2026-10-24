@@ -1,11 +1,14 @@
 import Examiner from "../models/examiner.model.js";
 import Theory from "../models/theory.model.js";
 import { generateExcel, generatePDF } from "../utils/export.util.js";
+const yearFilter = (req) =>
+  req.query.year ? { year: Number(req.query.year) } : {};
 
 const addTheoryExam = async (req, res) => {
   try {
-    const { examiner, designation, rate, totalDays, department, semester } =
+    const { examiner, designation, rate, totalDays, department, semester , year} =
       req.body;
+      
 
     if (
       !examiner ||
@@ -13,11 +16,12 @@ const addTheoryExam = async (req, res) => {
       !rate ||
       !totalDays ||
       !department ||
-      !semester
+      !semester || 
+      !year
     ) {
       return res.status(400).json({
         message:
-          "Examiner, designation, rate, total days, department, and semester are required",
+          "Examiner, designation, rate, total days, department, semester, and year are required",
       });
     }
 
@@ -38,6 +42,7 @@ const addTheoryExam = async (req, res) => {
       totalDays: daysNum,
       department,
       semester: Number(semester),
+      year : Number(year),
       totalRemuneration,
     });
     return res
@@ -53,7 +58,7 @@ const addTheoryExam = async (req, res) => {
 
 const getTheoryExam = async (req, res) => {
   try {
-    const theoryExams = await Theory.find().populate("examiner", "name");
+    const theoryExams = await Theory.find(yearFilter(req)).populate("examiner", "name");
 
     return res
       .status(200)
@@ -144,7 +149,7 @@ const deleteTheoryExam = async (req, res) => {
 
 const exportTheoryExcel = async (req, res) => {
   try {
-    const theoryExams = await Theory.find().populate("examiner", "name");
+    const theoryExams = await Theory.find(yearFilter(req)).populate("examiner", "name");
 
     const columns = [
       { header: "Examiner Name", key: "examinerName", width: 25 },
@@ -180,9 +185,10 @@ const exportTheoryExcel = async (req, res) => {
 
 const exportTheoryPDF = async (req, res) => {
   try {
-    const theoryExams = await Theory.find()
-      .populate("examiner", "name")
-      .populate("designation", "title");
+    const theoryExams = await Theory.find(yearFilter(req)).populate(
+      "examiner",
+      "name",
+    );
 
     const columns = [
       { header: "Examiner Name", key: "examinerName" },
@@ -194,7 +200,7 @@ const exportTheoryPDF = async (req, res) => {
 
     const rows = theoryExams.map((item) => ({
       examinerName: item.examiner?.name || "N/A",
-      designationTitle: item.designation?.title || "N/A",
+      designationTitle: item.designation || "N/A",
       rate: item.rate,
       totalDays: item.totalDays,
       totalRemuneration: item.totalRemuneration,

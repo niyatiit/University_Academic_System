@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../components/DashboardLayout";
 import api from "../api/axios";
 import { downloadFile } from "../utils/downloadFile";
+import { useYear } from "../context/YearContext";
 
 const masterDepartments = ["MBA", "MCA"];
 const allDepartments = ["BBA", "MBA", "BCA", "MCA", "JMC", "B.TECH", "BCOM"];
 
 function Summary() {
+  const { year } = useYear();
   const [summary, setSummary] = useState([]);
   const [department, setDepartment] = useState("");
   const [semester, setSemester] = useState("");
@@ -17,7 +19,7 @@ function Summary() {
 
   useEffect(() => {
     fetchSummary();
-  }, [department, semester]);
+  }, [department, semester, year]);
 
   const fetchSummary = async () => {
     setLoading(true);
@@ -25,6 +27,7 @@ function Summary() {
       const params = {};
       if (department) params.department = department;
       if (semester) params.semester = semester;
+      params.year = year;
 
       const res = await api.get("/summary", { params });
       setSummary(res.data.summary);
@@ -49,7 +52,7 @@ function Summary() {
         params,
         responseType: "blob",
       });
-      downloadFile(res.data, "Summary.xlsx");
+      downloadFile(res.data, `Summary_${year}.xlsx`);
     } catch (err) {
       console.error("Excel export failed:", err);
     }
@@ -64,7 +67,7 @@ function Summary() {
         params,
         responseType: "blob",
       });
-      downloadFile(res.data, "Summary.pdf");
+      downloadFile(res.data, `Summary_${year}.pdf`);
     } catch (err) {
       console.error("PDF export failed:", err);
     }
@@ -76,7 +79,7 @@ function Summary() {
     <DashboardLayout>
       <div className="p-8 max-w-5xl">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">Summary</h1>
+          <h1 className="text-2xl font-bold text-slate-800">Summary ({year}) </h1>
           <div className="flex gap-2">
             <button
               onClick={handleExportExcel}

@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../components/DashboardLayout";
 import api from "../api/axios";
 import { downloadFile } from "../utils/downloadFile";
+import { useYear } from "../context/YearContext";
 
 function TheoryExamination() {
+  const { year } = useYear();
+
   const [examiners, setExaminers] = useState([]);
   const [entries, setEntries] = useState([]);
   const [formData, setFormData] = useState({
@@ -22,8 +25,11 @@ function TheoryExamination() {
 
   useEffect(() => {
     fetchExaminers();
-    fetchEntries();
   }, []);
+
+  useEffect(() => {
+    fetchEntries();
+  }, [year]);
 
   const fetchExaminers = async () => {
     try {
@@ -36,14 +42,13 @@ function TheoryExamination() {
 
   const fetchEntries = async () => {
     try {
-      const res = await api.get("/theory/all");
+      const res = await api.get("/theory/all", { params: { year } });
       setEntries(res.data.theoryExams);
     } catch (err) {
       console.error("Failed to fetch theory entries:", err);
     }
   };
 
-  const selectedExaminer = examiners.find((ex) => ex._id === formData.examiner);
   const rate = Number(formData.rate) || 0;
   const totalDaysNum = Number(formData.totalDays) || 0;
   const totalRemuneration = rate * totalDaysNum;
@@ -78,12 +83,11 @@ function TheoryExamination() {
     try {
       const res = editingId
         ? await api.put(`/theory/update/${editingId}`, formData)
-        : await api.post("/theory/add", formData);
+        : await api.post("/theory/add", { ...formData, year });
       setMessage({ type: "success", text: res.data.message });
       resetForm();
       fetchEntries();
     } catch (err) {
-      console.log("Update error:", err.response); // 👈 add this line
       setMessage({
         type: "error",
         text:
@@ -120,6 +124,30 @@ function TheoryExamination() {
     }
   };
 
+  const handleExportExcel = async () => {
+    try {
+      const res = await api.get("/theory/export/excel", {
+        params: { year },
+        responseType: "blob",
+      });
+      downloadFile(res.data, `TheoryExamination_${year}.xlsx`);
+    } catch (err) {
+      console.error("Excel export failed:", err);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      const res = await api.get("/theory/export/pdf", {
+        params: { year },
+        responseType: "blob",
+      });
+      downloadFile(res.data, `TheoryExamination_${year}.pdf`);
+    } catch (err) {
+      console.error("PDF export failed:", err);
+    }
+  };
+
   const maxSemester = masterDepartments.includes(formData.department) ? 4 : 8;
   const semesterOptions = Array.from({ length: maxSemester }, (_, i) => i + 1);
 
@@ -128,7 +156,7 @@ function TheoryExamination() {
       <div className="p-8 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-slate-800">
-            Theory Examination
+            Theory Examination ({year})
           </h1>
           <div className="flex gap-2">
             <button
@@ -145,6 +173,7 @@ function TheoryExamination() {
             </button>
           </div>
         </div>
+
         {editingId && (
           <div className="mb-4 flex items-center justify-between bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium rounded-md px-4 py-2">
             Editing entry — update the fields below and submit.
@@ -157,6 +186,7 @@ function TheoryExamination() {
             </button>
           </div>
         )}
+
         {/* Form */}
         <form
           onSubmit={handleSubmit}
@@ -182,6 +212,7 @@ function TheoryExamination() {
                 ))}
               </select>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Designation
@@ -331,7 +362,7 @@ function TheoryExamination() {
                   <td className="px-4 py-3">{entry.examiner?.name}</td>
                   <td className="px-4 py-3">
                     {entry.designation?.title || entry.designation}
-                  </td>{" "}
+                  </td>
                   <td className="px-4 py-3">₹{entry.rate}</td>
                   <td className="px-4 py-3">{entry.totalDays}</td>
                   <td className="px-4 py-3 font-semibold text-blue-600">
@@ -364,10 +395,10 @@ function TheoryExamination() {
               {entries.length === 0 && (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={8}
                     className="px-4 py-6 text-center text-slate-400"
                   >
-                    No entries yet
+                    No entries yet for {year}
                   </td>
                 </tr>
               )}
@@ -379,21 +410,4 @@ function TheoryExamination() {
   );
 }
 
-const handleExportExcel = async () => {
-  try {
-    const res = await api.get("/theory/export/excel", { responseType: "blob" });
-    downloadFile(res.data, "TheoryExamination.xlsx");
-  } catch (err) {
-    console.error("Excel export failed:", err);
-  }
-};
-
-const handleExportPDF = async () => {
-  try {
-    const res = await api.get("/theory/export/pdf", { responseType: "blob" });
-    downloadFile(res.data, "TheoryExamination.pdf");
-  } catch (err) {
-    console.error("PDF export failed:", err);
-  }
-};
 export default TheoryExamination;

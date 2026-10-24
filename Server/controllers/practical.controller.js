@@ -2,6 +2,10 @@ import Examiner from "../models/examiner.model.js";
 import Practical from "../models/practical.model.js";
 import { generateExcel, generatePDF } from "../utils/export.util.js";
 
+
+const yearFilter = (req) =>
+  req.query.year ? { year: Number(req.query.year) } : {};
+
 const addPractical = async (req, res) => {
   try {
     const {
@@ -17,6 +21,7 @@ const addPractical = async (req, res) => {
       honorarium,
       department,
       semester,
+      year
     } = req.body;
 
     if (
@@ -27,11 +32,12 @@ const addPractical = async (req, res) => {
       !date ||
       !subjectCode ||
       !department ||
-      !semester
+      !semester || 
+      !year
     ) {
       return res.status(400).json({
         message:
-          "Examiner, designation, rate, total days, date, subject code, department, and semester are required",
+          "Examiner, designation, rate, total days, date, subject code, department, semester and year are required",
       });
     }
 
@@ -59,6 +65,7 @@ const addPractical = async (req, res) => {
       personName: personName || "",
       department,
       semester: Number(semester),
+      year : Number(year),
       ta: taAmount,
       da: daAmount,
       honorarium: honorariumAmount,
@@ -76,7 +83,7 @@ const addPractical = async (req, res) => {
 
 const getPractical = async (req, res) => {
   try {
-    const practicalExams = await Practical.find().populate("examiner", "name");
+    const practicalExams = await Practical.find(yearFilter(req)).populate("examiner", "name");
 
     return res
       .status(200)
@@ -185,7 +192,7 @@ const deletePractical = async (req, res) => {
 
 const exportPracticalExcel = async (req, res) => {
   try {
-    const practicalExams = await Practical.find().populate("examiner", "name");
+    const practicalExams = await Practical.find(yearFilter(req)).populate("examiner", "name");
 
     const columns = [
       { header: "Examiner Name", key: "examinerName", width: 22 },
@@ -233,9 +240,10 @@ const exportPracticalExcel = async (req, res) => {
 
 const exportPracticalPDF = async (req, res) => {
   try {
-    const practicalExams = await Practical.find()
-      .populate("examiner", "name")
-      .populate("designation", "title");
+    const practicalExams = await Practical.find(yearFilter(req)).populate(
+      "examiner",
+      "name",
+    );
 
     const columns = [
       { header: "Examiner", key: "examinerName" },
@@ -252,7 +260,7 @@ const exportPracticalPDF = async (req, res) => {
 
     const rows = practicalExams.map((item) => ({
       examinerName: item.examiner?.name || "N/A",
-      designationTitle: item.designation?.title || "N/A",
+      designationTitle: item.designation || "N/A",
       rate: item.rate,
       totalDays: item.totalDays,
       date: item.date ? new Date(item.date).toLocaleDateString() : "",

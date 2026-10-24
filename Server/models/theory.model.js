@@ -35,6 +35,10 @@ const theorySchema = new mongoose.Schema(
       min: 1,
       max: 8,
     },
+    year: {
+      type: Number,
+      required: [true, "Year is required"],
+    },
   },
   {
     timestamps: true,

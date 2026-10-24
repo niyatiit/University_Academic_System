@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../components/DashboardLayout";
 import api from "../api/axios";
 import { downloadFile } from "../utils/downloadFile";
+import { useYear } from "../context/YearContext";
 
 function PracticalExamination() {
+  const { year } = useYear();
+
   const [examiners, setExaminers] = useState([]);
   const [entries, setEntries] = useState([]);
   const [formData, setFormData] = useState({
@@ -27,8 +30,11 @@ function PracticalExamination() {
 
   useEffect(() => {
     fetchExaminers();
-    fetchEntries();
   }, []);
+
+  useEffect(() => {
+    fetchEntries();
+  }, [year]);
 
   const fetchExaminers = async () => {
     try {
@@ -41,14 +47,13 @@ function PracticalExamination() {
 
   const fetchEntries = async () => {
     try {
-      const res = await api.get("/practical/all");
+      const res = await api.get("/practical/all", { params: { year } });
       setEntries(res.data.practicalExams);
     } catch (err) {
       console.error("Failed to fetch practical entries:", err);
     }
   };
 
-  const selectedExaminer = examiners.find((ex) => ex._id === formData.examiner);
   const rate = Number(formData.rate) || 0;
   const totalDaysNum = Number(formData.totalDays) || 0;
   const taNum = Number(formData.ta) || 0;
@@ -91,12 +96,11 @@ function PracticalExamination() {
     try {
       const res = editingId
         ? await api.put(`/practical/update/${editingId}`, formData)
-        : await api.post("/practical/add", formData);
+        : await api.post("/practical/add", { ...formData, year });
       setMessage({ type: "success", text: res.data.message });
       resetForm();
       fetchEntries(); // refresh table
     } catch (err) {
-      console.log("Update error:", err.response); // 👈 add this line
       setMessage({
         type: "error",
         text:
@@ -138,14 +142,39 @@ function PracticalExamination() {
     }
   };
 
+  const handleExportExcel = async () => {
+    try {
+      const res = await api.get("/practical/export/excel", {
+        params: { year },
+        responseType: "blob",
+      });
+      downloadFile(res.data, `PracticalExamination_${year}.xlsx`);
+    } catch (err) {
+      console.error("Excel export failed:", err);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      const res = await api.get("/practical/export/pdf", {
+        params: { year },
+        responseType: "blob",
+      });
+      downloadFile(res.data, `PracticalExamination_${year}.pdf`);
+    } catch (err) {
+      console.error("PDF export failed:", err);
+    }
+  };
+
   const maxSemester = masterDepartments.includes(formData.department) ? 4 : 8;
   const semesterOptions = Array.from({ length: maxSemester }, (_, i) => i + 1);
+
   return (
     <DashboardLayout>
       <div className="p-8 max-w-5xl">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-slate-800">
-            Practical Examination
+            Practical Examination ({year})
           </h1>
           <div className="flex gap-2">
             <button
@@ -318,7 +347,6 @@ function PracticalExamination() {
                 value={formData.subjectCode}
                 onChange={handleChange}
                 placeholder="e.g. CS10101"
-                // pattern="[A-Za-z]{2,5}[0-9]{2,4}"
                 title="Letters followed by numbers, e.g. CS10101"
                 className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
                 required
@@ -469,7 +497,7 @@ function PracticalExamination() {
                     colSpan={11}
                     className="px-4 py-6 text-center text-slate-400"
                   >
-                    No entries yet
+                    No entries yet for {year}
                   </td>
                 </tr>
               )}
@@ -480,27 +508,5 @@ function PracticalExamination() {
     </DashboardLayout>
   );
 }
-
-const handleExportExcel = async () => {
-  try {
-    const res = await api.get("/practical/export/excel", {
-      responseType: "blob",
-    });
-    downloadFile(res.data, "PracticalExamination.xlsx");
-  } catch (err) {
-    console.error("Excel export failed:", err);
-  }
-};
-
-const handleExportPDF = async () => {
-  try {
-    const res = await api.get("/practical/export/pdf", {
-      responseType: "blob",
-    });
-    downloadFile(res.data, "PracticalExamination.pdf");
-  } catch (err) {
-    console.error("PDF export failed:", err);
-  }
-};
 
 export default PracticalExamination;

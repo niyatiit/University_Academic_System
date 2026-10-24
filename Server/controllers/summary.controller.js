@@ -7,7 +7,7 @@ import { generateExcel, generatePDF } from "../utils/export.util.js";
 // @route  GET /api/summary?department=X&semester=Y
 const getFilteredSummary = async (req, res) => {
   try {
-    const { department, semester } = req.query;
+    const { department, semester, year } = req.query;
 
     const theoryFilter = {};
     const practicalFilter = {};
@@ -21,8 +21,13 @@ const getFilteredSummary = async (req, res) => {
       practicalFilter.semester = Number(semester);
     }
 
+    if (year) {
+      theoryFilter.year = Number(year);
+      practicalFilter.year = Number(year);
+    }
     const theoryEntries = await Theory.find(theoryFilter).populate("examiner");
-    const practicalEntries = await Practical.find(practicalFilter).populate("examiner");
+    const practicalEntries =
+      await Practical.find(practicalFilter).populate("examiner");
 
     const totals = {};
 
@@ -75,8 +80,8 @@ const getFilteredSummary = async (req, res) => {
 // @route  GET /api/summary/export/excel
 const exportSummaryExcel = async (req, res) => {
   try {
-    const { department, semester } = req.query;
-    const summaryRes = await buildSummary(department, semester);
+    const { department, semester, year } = req.query;
+    const summaryRes = await buildSummary(department, semester, year);
 
     const columns = [
       { header: "Name", key: "name", width: 25 },
@@ -86,11 +91,10 @@ const exportSummaryExcel = async (req, res) => {
       { header: "Total Amount", key: "amount", width: 16 },
     ];
 
-    const buffer = await generateExcel("Summary Report", columns, summaryRes);
-
+const buffer = await generateExcel(`Summary ${year || ""}`.trim(), columns, summaryRes);
     res.setHeader(
       "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
     res.setHeader("Content-Disposition", "attachment; filename=Summary.xlsx");
     res.send(buffer);
@@ -103,8 +107,8 @@ const exportSummaryExcel = async (req, res) => {
 // @route  GET /api/summary/export/pdf
 const exportSummaryPDF = async (req, res) => {
   try {
-    const { department, semester } = req.query;
-    const summaryRes = await buildSummary(department, semester);
+    const { department, semester, year } = req.query;
+    const summaryRes = await buildSummary(department, semester, year);
 
     const columns = [
       { header: "Name", key: "name" },
@@ -114,9 +118,9 @@ const exportSummaryPDF = async (req, res) => {
       { header: "Total Amount", key: "amount" },
     ];
 
-    const title = department
-      ? `Summary Report - ${department}${semester ? ` Semester ${semester}` : ""}`
-      : "Summary Report";
+    const title = `Summary Report - ${year || "All Years"}${
+      department ? ` - ${department}` : ""
+    }${semester ? ` Semester ${semester}` : ""}`;
 
     const buffer = await generatePDF(title, columns, summaryRes);
 
@@ -129,7 +133,7 @@ const exportSummaryPDF = async (req, res) => {
 };
 
 // Shared helper used by both export functions
-const buildSummary = async (department, semester) => {
+const buildSummary = async (department, semester, year) => {
   const theoryFilter = {};
   const practicalFilter = {};
 
@@ -141,9 +145,14 @@ const buildSummary = async (department, semester) => {
     theoryFilter.semester = Number(semester);
     practicalFilter.semester = Number(semester);
   }
+  if (year) {
+    theoryFilter.year = Number(year);
+    practicalFilter.year = Number(year);
+  }
 
   const theoryEntries = await Theory.find(theoryFilter).populate("examiner");
-  const practicalEntries = await Practical.find(practicalFilter).populate("examiner");
+  const practicalEntries =
+    await Practical.find(practicalFilter).populate("examiner");
 
   const totals = {};
 
