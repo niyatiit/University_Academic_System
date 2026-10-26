@@ -36,9 +36,9 @@ app.use(express.urlencoded({ extended : true}))
 
 
 // Test Routes
-app.get("/",(req,res)=>{
-    res.send("🥳🥳 Academic Payment Portal API is running .... ");
-})
+app.get("/", (req, res) => {
+  res.send("🥳🥳 Academic Payment Portal API is running .... (year filter v2)");
+});
 
 // app.use((req, res, next) => {
 //   console.log("Incoming request:", req.method, req.url);

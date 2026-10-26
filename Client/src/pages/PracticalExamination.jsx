@@ -339,7 +339,7 @@ function PracticalExamination() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Subject Code
+                Subject Code {""} <span className="text-slate-400 font-normal">(optional)</span>
               </label>
               <input
                 type="text"

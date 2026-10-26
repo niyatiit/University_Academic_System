@@ -30,14 +30,13 @@ const addPractical = async (req, res) => {
       !rate ||
       !totalDays ||
       !date ||
-      !subjectCode ||
       !department ||
       !semester || 
       !year
     ) {
       return res.status(400).json({
         message:
-          "Examiner, designation, rate, total days, date, subject code, department, semester and year are required",
+          "Examiner, designation, rate, total days, date, department, semester and year are required",
       });
     }
 
@@ -61,7 +60,7 @@ const addPractical = async (req, res) => {
       rate: rateNum,
       totalDays: daysNum,
       date,
-      subjectCode,
+      subjectCode : subjectCode || "",
       personName: personName || "",
       department,
       semester: Number(semester),
@@ -104,7 +103,7 @@ const updatePractical = async (req, res) => {
       rate,
       totalDays,
       date,
-      subjectCode,
+      subjectCode ,
       ta,
       da,
       honorarium,
@@ -118,7 +117,6 @@ const updatePractical = async (req, res) => {
       !rate ||
       !totalDays ||
       !date ||
-      !subjectCode ||
       !department ||
       !semester
     ) {
@@ -148,7 +146,7 @@ const updatePractical = async (req, res) => {
         rate: rateNum,
         totalDays: daysNum,
         date,
-        subjectCode,
+        subjectCode : subjectCode || "",
         department,
         semester: Number(semester),
         ta: taAmount,
@@ -214,7 +212,7 @@ const exportPracticalExcel = async (req, res) => {
       rate: item.rate,
       totalDays: item.totalDays,
       date: item.date ? new Date(item.date).toLocaleDateString() : "",
-      subjectCode: item.subjectCode,
+      subjectCode: item.subjectCode || "-",
       personName: item.personName || "-",
       ta: item.ta,
       da: item.da,
@@ -264,7 +262,7 @@ const exportPracticalPDF = async (req, res) => {
       rate: item.rate,
       totalDays: item.totalDays,
       date: item.date ? new Date(item.date).toLocaleDateString() : "",
-      subjectCode: item.subjectCode,
+      subjectCode: item.subjectCode || "-",
       ta: item.ta,
       da: item.da,
       honorarium: item.honorarium,

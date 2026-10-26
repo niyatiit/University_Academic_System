@@ -26,9 +26,9 @@ const practicalSchema = new mongoose.Schema(
     },
     subjectCode: {
       type: String,
-      required: [true, "Subject code is required"],
       trim: true,
       uppercase: true,
+      default: "",
     },
     personName: {
       type: String,
